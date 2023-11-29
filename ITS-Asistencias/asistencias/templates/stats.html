@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    
+
+<h2>Estadísticas Generales</h2>
+
+<div class="stats-container">
+	<div class="stat-box">
+		<h3>Total de Empleados</h3>
+		<p>{{ total_empleados }}</p>
+	</div>
+
+	<div class="stat-box">
+		<h3>Asistencias Registradas</h3>
+		<p>{{ total_asistencias }}</p>
+	</div>
+
+	<div class="stat-box">
+		<h3>Llegadas Tarde</h3>
+		<p>{{ llegadas_tarde }}</p>
+	</div>
+</div>
+
+<h2>Gráfico de Asistencias</h2>
+
+<canvas id="asistenciasChart" width="400" height="200"></canvas>
+
+<h2>Detalles de Asistencias</h2>
+
+<table>
+	<thead>
+		<tr>
+			<th>Empleado</th>
+			<th>Fecha</th>
+			<th>Marca de Asistencia</th>
+			<th>Llegada Tardía</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for asistencia in asistencias %}
+			<tr>
+				<td>{{ asistencia.empleado }}</td>
+				<td>{{ asistencia.fecha }}</td>
+				<td>{{ asistencia.marca_asistencia }}</td>
+				<td>{{ asistencia.llegada_tarde }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+<script>
+	var ctx = document.getElementById('asistenciasChart').getContext('2d');
+	var myChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
+			datasets: [{
+				label: 'Asistencias por Mes',
+				data: [10, 15, 7, 20, 12, 18],
+				backgroundColor: 'rgba(75, 192, 192, 0.2)',
+				borderColor: 'rgba(75, 192, 192, 1)',
+				borderWidth: 1
+			}]
+		},
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		}
+	});
+</script>
+{% endblock %}

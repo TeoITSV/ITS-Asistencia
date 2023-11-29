@@ -1,0 +1,138 @@
+<!-- base.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Página de Inicio{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	
+    <!-- Font Awesome -->
+    
+    <!-- Estilos personalizados para el cambio de tema -->
+    <style>
+        body {
+            transition: background-color 0.5s;
+            color: #000000; /* Color de texto predeterminado en el tema claro */
+        }
+
+        .light-theme {
+            background-color: #ffffff;
+        }
+
+        .dark-theme {
+            background-color: #333333;
+            color: #ffffff; /* Color de texto en el tema oscuro */
+        }
+
+        #theme-toggle {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        #toggle-container {
+            width: 50px;
+            height: 25px;
+            background-color: #dddddd;
+            display: flex;
+            align-items: center;
+            border-radius: 25px;
+            padding: 2px;
+        }
+
+        #toggle-circle {
+            width: 21px;
+            height: 21px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.5s;
+        }
+
+        #toggle-circle i {
+            font-size: 12px;
+        }
+
+        .navbar-light {
+            background-color: #f8f9fa !important;
+            color: #000000 !important;
+        }
+
+        .navbar-light .navbar-brand {
+            color: #000000 !important;
+        }
+
+        .navbar-dark {
+            background-color: #343a40 !important;
+            color: #ffffff !important;
+        }
+
+        .navbar-dark .navbar-brand {
+            color: #ffffff !important;
+        }
+
+        .dark-theme .navbar-light {
+            background-color: #343a40 !important;
+            color: #ffffff !important;
+        }
+
+        .dark-theme .navbar-light .navbar-brand {
+            color: #ffffff !important;
+        }
+
+        .dark-theme .navbar-dark {
+            background-color: #343a40 !important;
+            color: #ffffff !important;
+        }
+
+        .dark-theme .navbar-dark .navbar-brand {
+            color: #ffffff !important;
+        }
+
+        .dark-theme #toggle-circle {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body class="light-theme">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Sistema de asistencia</a>
+		<a class="navbar-brand" href="#">Faltas</a>
+        <div id="theme-toggle">
+            <div id="toggle-container">
+                <div id="toggle-circle"><i>☀</i></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5" id="mainBody">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap JS and dependencies (Popper.js, jQuery) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Script para cambiar el tema -->
+    <script>
+        const body = document.body;
+        const toggleButton = document.getElementById('theme-toggle');
+        const toggleCircle = document.getElementById('toggle-circle');
+
+        toggleButton.addEventListener('click', function() {
+            body.classList.toggle('dark-theme');
+            toggleCircle.innerHTML = body.classList.contains('dark-theme') ? '<i>🌛</i>' : '<i>☀</i>';
+        });
+    </script>
+</body>
+</html>
