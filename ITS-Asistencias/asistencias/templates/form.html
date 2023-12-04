@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Formulario de Carga de Archivos</h2>
+
+    <form method="post" enctype="multipart/form-data"  id="uploadForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_horarios_file">Archivo de Horarios (xlsx)</label>
+            <div class="input-group mb-3">
+                <div class="custom-file">
+                    <label class="custom-file-label" for="inputGroupFile01" id="horarios_file_label" onclick="document.getElementById('horarios_file_input').click();">Choose file</label>
+                    {{ form.horarios_file }}
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="id_marcas_file">Archivo de Marcas de Dedo (xlsx)</label>
+            <div class="input-group mb-3">
+                <div class="custom-file">
+                    <label class="custom-file-label" for="inputGroupFile02" id="marcas_file_label" onclick="document.getElementById('marcas_file_input').click();">Choose file</label>
+                    {{ form.marcas_file }}
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+</div>
+
+<!-- Modal de éxito -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">¡Éxito!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                El formulario se ha enviado con éxito.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('horarios_file_input').addEventListener('change', function() {
+        var filename = this.value.split('\\').pop();
+        document.getElementById('horarios_file_label').innerText = filename;
+    });
+
+    document.getElementById('marcas_file_input').addEventListener('change', function() {
+        var filename = this.value.split('\\').pop();
+        document.getElementById('marcas_file_label').innerText = filename;
+    });
+
+	document.getElementById('uploadForm').addEventListener('submit', function(event) {
+		console.log('submit');
+        // Evitar que el formulario se envíe de inmediato
+
+        // Aquí puedes agregar lógica adicional si es necesario antes de mostrar el mensaje de éxito
+
+        // Mostrar el modal de éxito
+        $('#successModal').modal('show');
+    });
+</script>
+{% endblock %}
