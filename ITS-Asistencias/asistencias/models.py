@@ -21,12 +21,14 @@ class Horario(Base):
     fechaBajada = models.DateTimeField(null=True, blank=True);
 
     def __str__(self):
-        return str(self.empleado.nombreCompleto);
+        return str(self.empleado.nombreCompleto) + " " + str(self.id) + " " + self.fechaCreacion.strftime("%d/%m/%Y %H:%M:%S");
 class DiaHorario(Base):
     horaEntrada = models.TimeField(null=True, blank=True);
     horaSalida = models.TimeField(null=True, blank=True);
     diaNombre = models.ForeignKey('Dia', on_delete=models.CASCADE);
     horario = models.ForeignKey('Horario', on_delete=models.CASCADE);
+    def __str__(self):
+        return str(self.diaNombre) + " In: " + str(self.horaEntrada)+ " Out: " + str(self.horaSalida);
 
 class Dia(Base):
     nombre = models.CharField(max_length=10);
@@ -35,9 +37,12 @@ class Dia(Base):
 class TipoMarca(Base):
     nombre = models.CharField(max_length=10);
     descripcion = models.CharField(max_length=100);
+    def __str__(self):
+        return self.nombre;
 class Marca(Base):
     fechaHora = models.DateTimeField();
     empleado = models.ForeignKey('Empleado', on_delete=models.CASCADE);
     tipoMarca = models.ForeignKey('TipoMarca', on_delete=models.CASCADE,null=True, blank=True);
     diaHorario = models.ForeignKey('DiaHorario', on_delete=models.CASCADE,null=True, blank=True);
-
+    def __str__(self):
+        return str(self.empleado.nombreCompleto) + " " + str(self.fechaHora) + " " + str(self.tipoMarca);

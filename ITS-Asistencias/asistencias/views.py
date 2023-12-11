@@ -19,7 +19,9 @@ def upload_files(request):
             horarios_file = form.cleaned_data['horarios_file']
             marcas_file = form.cleaned_data['marcas_file']
             leerPlanillaHorarios(horarios_file)
-            return redirect('base')
+            leerPlanillaMarcas(marcas_file)
+            success_flag = True
+            return render(request, 'form.html', {'form': form, 'success_flag': success_flag})
     else:
         # Si hay parámetros en la URL, intenta prellenar el formulario
         form = UploadForm(initial={

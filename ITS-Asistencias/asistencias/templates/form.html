@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <div class="container mt-5">
     <h2 class="mb-4">Formulario de Carga de Archivos</h2>
 
@@ -48,6 +48,14 @@
         </div>
     </div>
 </div>
+{% if success_flag %}
+    <script>
+        $(document).ready(function() {
+            // Mostrar el modal de éxito cuando success_flag está presente
+            $('#successModal').modal('show');
+        });
+    </script>
+{% endif %}
 <script>
     document.getElementById('horarios_file_input').addEventListener('change', function() {
         var filename = this.value.split('\\').pop();
@@ -59,14 +67,5 @@
         document.getElementById('marcas_file_label').innerText = filename;
     });
 
-	document.getElementById('uploadForm').addEventListener('submit', function(event) {
-		console.log('submit');
-        // Evitar que el formulario se envíe de inmediato
-
-        // Aquí puedes agregar lógica adicional si es necesario antes de mostrar el mensaje de éxito
-
-        // Mostrar el modal de éxito
-        $('#successModal').modal('show');
-    });
 </script>
 {% endblock %}
