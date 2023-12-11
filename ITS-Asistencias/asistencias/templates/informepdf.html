@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Formulario de Informe</h2>
+
+    <form method="post" id="informeForm" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="id_fechaInicio">Fecha Inicio</label>
+            {{ form.fechaInicio }}
+            <div class="invalid-feedback">
+                {{ form.fechaInicio.errors }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_fechaFin">Fecha Fin</label>
+            {{ form.fechaFin }}
+            <div class="invalid-feedback">
+                {{ form.fechaFin.errors }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_empleados">Empleados</label>
+            {{ form.empleados }}
+            <div class="invalid-feedback">
+                {{ form.empleados.errors }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_margenEntrada">Margen Entrada</label>
+            {{ form.margenEntrada }}
+            <div class="invalid-feedback">
+                {{ form.margenEntrada.errors }}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+</div>
+{% endblock %}
