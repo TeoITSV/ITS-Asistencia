@@ -33,34 +33,24 @@ def upload_files(request):
 
 def informe_pdf_view(request):
     initial_data = {
-                'fechaInicio': datetime.today().replace(day=1),
+                'fechaInicio': datetime.today().replace(day=1,month=1),
                 'fechaFin': (datetime.today().replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1),
+                'selectAll':'todos',
                 'empleados': [],
-                'margenEntrada': '00:00:00',
+                'minutos': 0,
+                'segundos':0
             }
-    form = InformeForm(initial=initial_data)
-    form.fields['empleados'].choices = [(empleado.idEmpleado, empleado.nombreCompleto) for empleado in Empleado.objects.filter(estaActivo=True)]
+    formInit = InformeForm(initial=initial_data)
+    formInit.fields['empleados'].choices = [(empleado.idEmpleado, empleado.nombreCompleto) for empleado in Empleado.objects.filter(estaActivo=True)]
     
     if request.method == 'POST':
         form = InformeForm(request.POST)
         if form.is_valid():
             success_flag = True
-            fechaInicio = form.cleaned_data['fechaInicio']
-            fechaFin = form.cleaned_data['fechaFin']
-            empleados = form.cleaned_data['empleados']
-            margenEntrada = form.cleaned_data['margenEntrada']
-            selectAll = form.cleaned_data['selectAll']
-            empleados = [Empleado.objects.get(idEmpleado=empleado) for empleado in empleados]
-            print(f'Fecha Inicio: {fechaInicio}')
-            print(f'Fecha Fin: {fechaFin}')
-            print(f'selectAll:{selectAll}')
-            print(f'Empleados: {empleados}')
-            print(f'Margen Entrada: {margenEntrada}')
-
-            return render(request, 'informepdf.html', {'form': form, 'success_flag': success_flag})
+            return generarInforme(form)
         else:
             # Crea una instancia del formulario con valores por defecto
             
             form = InformeForm(initial=initial_data)
 
-    return render(request, 'informepdf.html', {'form': form})
+    return render(request, 'informepdf.html', {'form': formInit})

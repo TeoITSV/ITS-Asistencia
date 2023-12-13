@@ -1,11 +1,17 @@
 from datetime import datetime, timedelta,time
 import json
 import locale
+import openpyxl
+
+import pytz
 from asistencias.models import *
 from django.utils import timezone
 import pandas as pd
 from collections import defaultdict
-
+from django.http import HttpResponse
+from openpyxl import Workbook
+from openpyxl.styles import Alignment
+from openpyxl.worksheet.table import Table, TableStyleInfo
 
 def crearEmpleadoFila(row):
     empleado_nombre = row['Nombre']
@@ -183,9 +189,93 @@ def leerPlanillaMarcas(marcasExcel):
         marcasEmpleadoPorDia = parseMarcas(df)
         for x in marcasEmpleadoPorDia:
             empleado = crearEmpleadoFila(x)
-            if x['ID de usuario'] == 117:
-                crearMarcaEmpleado(empleado,x)
+            crearMarcaEmpleado(empleado,x)
         # Convierte el diccionario a una lista de diccionarios
 
+def calcInformeEmpleado(empleado,fechaInicio,fechaFin,margenEntrada):
+    marcas = Marca.objects.filter(empleado=empleado,fechaHora__range=[fechaInicio, fechaFin]).order_by('fechaHora')
+    llegadasTarde = []
+    retirosFueradeHora = []
+    zona_horaria_argentina = timezone.get_default_timezone()  # O usa timezone.pytz.timezone('America/Argentina/Buenos_Aires')
 
+    for marca in marcas:
+        if marca.tipoMarca is not None and marca.diaHorario is not None:
+            if marca.tipoMarca.nombre == 'In':
+                fecha_entrada = datetime.combine(marca.fechaHora.date(), marca.diaHorario.horaEntrada)
+                
+                # Convertir fecha_entrada a objeto consciente de la zona horaria
+                fecha_entrada_con_zona = timezone.make_aware(fecha_entrada, zona_horaria_argentina)
 
+                # Sumar el margen directamente a la fecha y hora de entrada
+                fechaHoraInHorario = fecha_entrada_con_zona + timedelta(minutes=margenEntrada.minute, seconds=margenEntrada.second)
+                if (marca.fechaHora - timedelta(minutes=1)).replace(second=0) > fechaHoraInHorario:
+                    diferencia_tiempo = marca.fechaHora - fechaHoraInHorario
+                    marca.diferenciaFalta = diferencia_tiempo
+                    llegadasTarde.append(marca)
+            elif marca.tipoMarca.nombre == 'Out':
+                fecha_salida = datetime.combine(marca.fechaHora.date(), marca.diaHorario.horaSalida)
+                
+                # Convertir fecha_entrada a objeto consciente de la zona horaria
+                fecha_salida_con_zona = timezone.make_aware(fecha_salida, zona_horaria_argentina)
+
+                # Sumar el margen directamente a la fecha y hora de entrada
+                fechaHoraOutHorario = fecha_salida_con_zona + timedelta(minutes=margenEntrada.minute, seconds=margenEntrada.second)
+                if (marca.fechaHora + timedelta(minutes= 1)).replace(second=0) < fechaHoraOutHorario:
+                    diferencia_tiempo = marca.fechaHora - fechaHoraOutHorario
+                    marca.diferenciaFal = diferencia_tiempo
+                    retirosFueradeHora.append(marca)
+    return llegadasTarde , retirosFueradeHora
+
+def descargarInformeExcel(empleados):
+    # Crear un nuevo libro de trabajo
+    workbook = Workbook()
+    archivo = f'attachment; filename=registro{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.xlsx'
+    # Seleccionar la hoja activa
+    sheet = workbook.active
+
+    # Escribir datos en algunas celdas
+    columnas = ['ID Empleado', 'Empleado', 'Fecha','In/Out','Horario','Marca','Diferencia']
+    
+    sheet.append(columnas)
+    for data_row in empleados:
+        for llegadaTarde in data_row.llegadasTarde:
+            fila = [data_row.idEmpleado, data_row.nombreCompleto, llegadaTarde.fechaHora.strftime('%d/%m/%Y'),llegadaTarde.tipoMarca.nombre,llegadaTarde.diaHorario.horaEntrada.strftime('%H:%M:%S'),llegadaTarde.fechaHora.strftime('%H:%M:%S'),llegadaTarde.diferenciaFalta]
+            sheet.append(fila)
+        for retirosFueradeHora in data_row.retirosFueradeHora:
+            fila = [data_row.idEmpleado, data_row.nombreCompleto, retirosFueradeHora.fechaHora.strftime('%d/%m/%Y'),retirosFueradeHora.tipoMarca.nombre,retirosFueradeHora.diaHorario.horaSalida.strftime('%H:%M:%S'),retirosFueradeHora.fechaHora.strftime('%H:%M:%S'),retirosFueradeHora.diferenciaFal]
+            sheet.append(fila)
+
+     # Ajustar el formato de las celdas para que se vean mejor
+    for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
+        for cell in row:
+            cell.alignment = Alignment(horizontal='center')  # Alineación centrada
+
+    # Aplicar autofiltros
+    sheet.auto_filter.ref = sheet.dimensions
+
+    # Crear una respuesta HTTP con el archivo Excel
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = archivo
+
+    # Guardar el libro de trabajo en el flujo de respuesta
+    workbook.save(response)
+
+    return response
+def generarInforme(form):
+    fechaInicio = form.cleaned_data['fechaInicio']
+    fechaFin = form.cleaned_data['fechaFin']
+    minutos = form.cleaned_data['minutos'] or 0
+    segundos = form.cleaned_data['segundos'] or 0
+
+        # Crea un objeto timedelta con los valores proporcionados
+    margenEntrada = time(0,minutos,segundos)
+    selectAll = form.cleaned_data['selectAll']
+    if selectAll == 'all':
+        empleados = Empleado.objects.all()
+    else:
+        empleados = [Empleado.objects.get(idEmpleado=empleado) for empleado in form.cleaned_data['empleados']]
+    for empleado in empleados:
+        llegadasTarde, retirosFueradeHora = calcInformeEmpleado(empleado,fechaInicio,fechaFin,margenEntrada)
+        empleado.llegadasTarde = llegadasTarde
+        empleado.retirosFueradeHora = retirosFueradeHora
+    return descargarInformeExcel(empleados)

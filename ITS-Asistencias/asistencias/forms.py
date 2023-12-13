@@ -29,18 +29,25 @@ class InformeForm(forms.Form):
     )
     empleados = forms.MultipleChoiceField(
         label='Empleados',
-        widget=forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'empleados'}),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'empleados','required':False}),
+        required=False
     )
     selectAll = forms.ChoiceField(
         label='Seleccionar',
         choices=OPCIONES_SELECCION,
-        widget=forms.Select(attrs={'class': 'form-control mb-2'}),
+        widget=forms.Select(attrs={'class': 'form-control mb-2', 'id':'selectAll'}),
         required=True
     )
 
-    margenEntrada = forms.TimeField(
-        label='Margen Entrada',
-        widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control', 'id': 'margenEntrada', 'required': False}),
+    minutos = forms.IntegerField(
+        label='Minutos',
+        widget=forms.NumberInput(attrs={'type': 'number', 'class': 'form-control', 'id': 'minutos', 'required': False}),
+        required=False
+    )
+    
+    segundos = forms.IntegerField(
+        label='Segundos',
+        widget=forms.NumberInput(attrs={'type': 'number', 'class': 'form-control', 'id': 'segundos', 'required': False}),
         required=False
     )
 

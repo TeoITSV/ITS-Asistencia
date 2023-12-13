@@ -19,18 +19,27 @@
           <span class="text-danger">{{ form.fechaFin.errors }}</span>
         {% endif %}
       </div>
-      <div class="form-group{% if form.margenEntrada.errors %} has-error{% endif %}">
-        {{ form.margenEntrada.label_tag }}
-        {{ form.margenEntrada }}
-        {% if form.margenEntrada.errors %}
-          <span class="text-danger">{{ form.margenEntrada.errors }}</span>
+      <div class="form-group{% if form.minutos.errors or form.segundos.errors %} has-error{% endif %}">
+        <label class="control-label" for="{{ form.minutos.id_for_label }}">Margen de Entrada:</label>
+        
+        <div class="input-group">
+            {{ form.minutos }}
+            <span class="input-group-text">min</span>
+            {{ form.segundos }}
+            <span class="input-group-text">seg</span>
+        </div>
+        
+        {% if form.minutos.errors %}
+            <span class="col-md-2 text-danger">{{ form.minutos.errors }}</span>
         {% endif %}
-      </div>
+        {% if form.segundos.errors %}
+            <span class="col-md-2 text-danger">{{ form.segundos.errors }}</span>
+        {% endif %}
+    </div>
     <label for="selectAll">Seleccionar los empleados:</label>
-    <select id="selectAll" class="form-control mb-2">
-        <option value="all">Todos</option>
-        <option value="individual">Individuales</option>
-    </select>
+    <div class="form-group" >
+        {{ form.selectAll }}
+    </div>
 
     <!-- Contenedor para la tabla de "Individuales" -->
     <div id="tableContainer" style="display: none;" >
@@ -79,14 +88,36 @@
         </div>
     </div>
 </div>
-{% if success_flag %}
-    <script>
-        $(document).ready(function() {
-            // Mostrar el modal de éxito cuando success_flag está presente
-            $('#successModal').modal('show');
+
+<script>
+    $(document).ready(function() {
+        $('#form-id').submit(function(e) {
+            e.preventDefault();
+    
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        // Mostrar modal de éxito
+                        $('#myModal').modal('show');
+    
+                        // Redireccionar a la URL de descarga del archivo
+                        window.location.href = response.download_url;
+                    } else {
+                        // Manejar errores de validación del formulario si es necesario
+                        // ...
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Manejar errores de la solicitud AJAX si es necesario
+                    // ...
+                }
+            });
         });
+    });
     </script>
-{% endif %}
 <script>
     $(document).ready(function() {
         var table;
