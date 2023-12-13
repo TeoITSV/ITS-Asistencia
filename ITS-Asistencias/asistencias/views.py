@@ -32,7 +32,15 @@ def upload_files(request):
     return render(request, 'form.html', {'form': form})
 
 def informe_pdf_view(request):
-    form = InformeForm()
+    initial_data = {
+                'fechaInicio': datetime.today().replace(day=1),
+                'fechaFin': (datetime.today().replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1),
+                'empleados': [],
+                'margenEntrada': '00:00:00',
+            }
+    form = InformeForm(initial=initial_data)
+    form.fields['empleados'].choices = [(empleado.idEmpleado, empleado.nombreCompleto) for empleado in Empleado.objects.filter(estaActivo=True)]
+    
     if request.method == 'POST':
         form = InformeForm(request.POST)
         if form.is_valid():
@@ -41,21 +49,18 @@ def informe_pdf_view(request):
             fechaFin = form.cleaned_data['fechaFin']
             empleados = form.cleaned_data['empleados']
             margenEntrada = form.cleaned_data['margenEntrada']
+            selectAll = form.cleaned_data['selectAll']
             empleados = [Empleado.objects.get(idEmpleado=empleado) for empleado in empleados]
             print(f'Fecha Inicio: {fechaInicio}')
             print(f'Fecha Fin: {fechaFin}')
+            print(f'selectAll:{selectAll}')
             print(f'Empleados: {empleados}')
             print(f'Margen Entrada: {margenEntrada}')
 
             return render(request, 'informepdf.html', {'form': form, 'success_flag': success_flag})
         else:
             # Crea una instancia del formulario con valores por defecto
-            initial_data = {
-                'fechaInicio': '2023-01-01',
-                'fechaFin': '2023-01-31',
-                'empleados': [],
-                'margenEntrada': '08:00:00',
-            }
+            
             form = InformeForm(initial=initial_data)
 
     return render(request, 'informepdf.html', {'form': form})

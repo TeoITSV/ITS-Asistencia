@@ -1,44 +1,164 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Formulario de Informe</h2>
 
-    <form method="post" id="informeForm" class="needs-validation" novalidate>
-        {% csrf_token %}
+<form method="post" id="informeForm">
+    {% csrf_token %}
+        <div class="form-group{% if form.fechaInicio.errors %} has-error{% endif %}">
+        {{ form.fechaInicio.label_tag }}
+        {{ form.fechaInicio }}
+        {% if form.fechaInicio.errors %}
+          <span class="text-danger">{{ form.fechaInicio.errors }}</span>
+        {% endif %}
+      </div>
 
-        <div class="form-group">
-            <label for="id_fechaInicio">Fecha Inicio</label>
-            {{ form.fechaInicio }}
-            <div class="invalid-feedback">
-                {{ form.fechaInicio.errors }}
+      <div class="form-group{% if form.fechaFin.errors %} has-error{% endif %}">
+        {{ form.fechaFin.label_tag }}
+        {{ form.fechaFin }}
+        {% if form.fechaFin.errors %}
+          <span class="text-danger">{{ form.fechaFin.errors }}</span>
+        {% endif %}
+      </div>
+      <div class="form-group{% if form.margenEntrada.errors %} has-error{% endif %}">
+        {{ form.margenEntrada.label_tag }}
+        {{ form.margenEntrada }}
+        {% if form.margenEntrada.errors %}
+          <span class="text-danger">{{ form.margenEntrada.errors }}</span>
+        {% endif %}
+      </div>
+    <label for="selectAll">Seleccionar los empleados:</label>
+    <select id="selectAll" class="form-control mb-2">
+        <option value="all">Todos</option>
+        <option value="individual">Individuales</option>
+    </select>
+
+    <!-- Contenedor para la tabla de "Individuales" -->
+    <div id="tableContainer" style="display: none;" >
+        <!-- Tabla para "Individuales" -->
+        <table id="empleadosTable" class="table table-striped table-bordered dataTable" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Seleccionar</th>
+                    <th>Nombre del Empleado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for empleado_id, empleado_nombre in form.fields.empleados.choices %}
+                    <tr>
+                        <td class="text-center">
+                            <div class="custom-control custom-checkbox ">
+                                <input type="checkbox" class="custom-control-input" name="empleados" value="{{ empleado_id }}" id="checkbox{{ empleado_id }}">
+                                <label class="custom-control-label al" for="checkbox{{ empleado_id }}"></label>
+                            </div>
+                        </td>
+                        <td>{{ empleado_nombre }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Enviar</button>
+</form>
+<!-- Modal de éxito -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">¡Éxito!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                El formulario se ha enviado con éxito.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
             </div>
         </div>
-
-        <div class="form-group">
-            <label for="id_fechaFin">Fecha Fin</label>
-            {{ form.fechaFin }}
-            <div class="invalid-feedback">
-                {{ form.fechaFin.errors }}
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="id_empleados">Empleados</label>
-            {{ form.empleados }}
-            <div class="invalid-feedback">
-                {{ form.empleados.errors }}
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="id_margenEntrada">Margen Entrada</label>
-            {{ form.margenEntrada }}
-            <div class="invalid-feedback">
-                {{ form.margenEntrada.errors }}
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Enviar</button>
-    </form>
+    </div>
 </div>
+{% if success_flag %}
+    <script>
+        $(document).ready(function() {
+            // Mostrar el modal de éxito cuando success_flag está presente
+            $('#successModal').modal('show');
+        });
+    </script>
+{% endif %}
+<script>
+    $(document).ready(function() {
+        var table;
+
+        // Función para configurar DataTable
+        function setupDataTable() {
+            // Destruir DataTable si ya existe
+            if ($.fn.DataTable.isDataTable('#empleadosTable')) {
+                $('#empleadosTable').DataTable().destroy();
+            }
+
+            // Configuración DataTable con tema oscuro o claro
+            var themeClass = $('body').hasClass('dark-theme') ? 'table-light' : '';
+            table = $('#empleadosTable').DataTable({
+                paging: true,
+                pageLength: 10,
+                searching: true,
+                lengthChange: true,
+				responsive: true,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, 'All']
+                ],
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                },
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                     '<"row"<"col-sm-12"tr>>' +
+                     '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                
+                columnDefs: [
+                    // ... (configuración adicional si es necesaria)
+                ],
+                order: [
+                    // ... (configuración adicional de ordenamiento)
+                ],
+                columnDefs: [
+                    {
+                        targets: 'no-sort',
+                        orderable: false
+                    },
+                    // ... (configuración adicional de columnDefs)
+                ],
+                createdRow: function(row, data, index) {
+                    // ... (lógica adicional para manipular filas creadas)
+                }
+            });
+
+            // Agregar la clase del tema al DataTable
+            $('#empleadosTable').addClass(themeClass);
+        }
+
+        // Evento para la selección de todos
+        $('#selectAll').on('change', function() {
+            var value = $(this).val();
+
+            if (value === 'individual') {
+                // Mostrar la tabla de "Individuales" y configurar DataTable
+                $('#tableContainer').show();
+                setupDataTable();
+            } else {
+                // Ocultar la tabla de "Individuales" y destruir DataTable
+                $('#tableContainer').hide();
+                if (table) {
+                    table.destroy();
+                    table = null;
+                }
+            }
+        });
+
+        // Configurar DataTable al cargar la página
+        setupDataTable();
+    });
+</script>
 {% endblock %}
