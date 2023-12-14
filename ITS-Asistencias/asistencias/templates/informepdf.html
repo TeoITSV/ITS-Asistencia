@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<h2 class="mb-4">Generar Informe Excel</h2>
 <form method="post" id="informeForm">
     {% csrf_token %}
         <div class="form-group{% if form.fechaInicio.errors %} has-error{% endif %}">

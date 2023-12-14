@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+    app:
+        restart: unless-stopped
+        build:
+            context: .
+        ports:
+            - "8000:8000"
+        environment:
+          - LANG=es_AR.UTF-8
+          - LANGUAGE=es_AR:es
+          - LC_ALL=es_AR.UTF-8
+        volumes:
+            - .:/ITS-Asistencias

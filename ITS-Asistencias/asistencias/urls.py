@@ -7,5 +7,4 @@ urlpatterns = [
     path('form/', form_view, name='form'),
     path('upload/', upload_files, name='upload_files'),
     path('informe/', informe_pdf_view, name='informe_pdf')
-    # Puedes agregar más patrones de URL aquí si es necesario
 ]

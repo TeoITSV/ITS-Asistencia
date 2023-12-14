@@ -54,3 +54,5 @@ def informe_pdf_view(request):
             form = InformeForm(initial=initial_data)
 
     return render(request, 'informepdf.html', {'form': formInit})
+
+

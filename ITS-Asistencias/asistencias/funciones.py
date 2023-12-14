@@ -98,7 +98,6 @@ def parseMarcas(df):
 def crearMarcaEmpleado(empleado, dicMarcas):
     # Se busca el horario actual del empleado
     horario_actual = Horario.objects.filter(empleado=empleado,esActual=True).latest('fechaCreacion')
-
     for dia, marcas in dicMarcas['marcas'].items():
         fecha_dt = datetime.strptime(dia, "%m/%d/%y")
         nombre_dia_semana = fecha_dt.strftime("%A").capitalize()
@@ -109,7 +108,7 @@ def crearMarcaEmpleado(empleado, dicMarcas):
         # Convierte las marcas a objetos datetime
         marcas_dt = [datetime.strptime(marca, '%Y-%m-%d %H:%M:%S') for marca in marcas]
         # Obtén la hora de entrada y salida del horario actual
-        print(f'fecha_dt: {fecha_dt} - dia_horario_actual: {dia_horario_actual.horaEntrada}')
+        #print(f'fecha_dt: {fecha_dt} - dia_horario_actual: {dia_horario_actual.horaEntrada}')
         hora_entrada_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaEntrada)
         hora_salida_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaSalida)
 # aa
@@ -229,7 +228,7 @@ def calcInformeEmpleado(empleado,fechaInicio,fechaFin,margenEntrada):
 def descargarInformeExcel(empleados):
     # Crear un nuevo libro de trabajo
     workbook = Workbook()
-    archivo = f'attachment; filename=registro{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.xlsx'
+    archivo = f'attachment; filename=registro{datetime.now().strftime("%Y-%m-%d_%Hhs%Mm%Ss")}.xlsx'
     # Seleccionar la hoja activa
     sheet = workbook.active
 
