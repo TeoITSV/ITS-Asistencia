@@ -2,9 +2,6 @@
 FROM python:3.10.6
 USER root
 # Establece las variables de entorno para la configuración regional
-ENV LANG=es_ES.UTF-8
-ENV LANGUAGE=es_ES:es
-ENV LC_ALL=es_ES.UTF-8
 
 # Evita la generación de archivos .pyc y .pyo
 ENV PYTHONUNBUFFERED 1
@@ -25,6 +22,7 @@ COPY supervisord.conf /supervisord.conf
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 COPY . .
+
 
 # Expone el puerto 8000
 EXPOSE 8000

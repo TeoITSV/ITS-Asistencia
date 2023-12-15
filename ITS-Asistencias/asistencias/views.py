@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from asistencias.forms import UploadForm, InformeForm
 from asistencias.funciones import *
+import locale
 import pandas as pd
 
 # Create your views here.

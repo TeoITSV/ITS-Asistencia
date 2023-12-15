@@ -12,6 +12,15 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from openpyxl.worksheet.table import Table, TableStyleInfo
+def calcularDiaNombre(dia):
+    dias_en_ingles = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    dias_en_espanol = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+    diaNombre = dia.strftime("%A").capitalize()
+    if diaNombre in dias_en_ingles:
+        indice = dias_en_ingles.index(diaNombre)
+        return dias_en_espanol[indice]
+    else:
+        return diaNombre
 
 def crearEmpleadoFila(row):
     empleado_nombre = row['Nombre']
@@ -100,39 +109,40 @@ def crearMarcaEmpleado(empleado, dicMarcas):
     horario_actual = Horario.objects.filter(empleado=empleado,esActual=True).latest('fechaCreacion')
     for dia, marcas in dicMarcas['marcas'].items():
         fecha_dt = datetime.strptime(dia, "%m/%d/%y")
-        nombre_dia_semana = fecha_dt.strftime("%A").capitalize()
-        fecha_formateada = fecha_dt.strftime("%Y/%m/%d")
+        nombre_dia_semana = calcularDiaNombre(fecha_dt)
 
         # Se busca el día y horario correspondiente
         dia_horario_actual = DiaHorario.objects.filter(horario=horario_actual, diaNombre__nombre=nombre_dia_semana).first()
+        #print(f'Empleado: {empleado.nombreCompleto} - ID: {empleado.idEmpleado} - Dia: {dia}-{nombre_dia_semana} - Dia Horario: {dia_horario_actual}')
         # Convierte las marcas a objetos datetime
         marcas_dt = [datetime.strptime(marca, '%Y-%m-%d %H:%M:%S') for marca in marcas]
         # Obtén la hora de entrada y salida del horario actual
         #print(f'fecha_dt: {fecha_dt} - dia_horario_actual: {dia_horario_actual.horaEntrada}')
-        hora_entrada_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaEntrada)
-        hora_salida_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaSalida)
-# aa
-        marcaMax = max(marcas_dt)
-        marcaMin = min(marcas_dt)
-        tipoEntrada = None
-        igual = False
-        if marcaMax == marcaMin or len(marcas_dt) == 1:
-            igual = True
-            diferenciaHorarioIn = hora_entrada_horario - marcaMax
-            diferenciaHorarioOut = hora_salida_horario - marcaMax
-            if diferenciaHorarioIn < diferenciaHorarioOut:
-                tipoEntrada = 'In'
-            elif diferenciaHorarioIn > diferenciaHorarioOut:
-                tipoEntrada = 'Out'
+        if dia_horario_actual.horaEntrada is not None and dia_horario_actual.horaSalida is not None:
+            hora_entrada_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaEntrada)
+            hora_salida_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaSalida)
+    # aa
+            marcaMax = max(marcas_dt)
+            marcaMin = min(marcas_dt)
+            tipoEntrada = None
+            igual = False
+            if marcaMax == marcaMin or len(marcas_dt) == 1:
+                igual = True
+                diferenciaHorarioIn = hora_entrada_horario - marcaMax
+                diferenciaHorarioOut = hora_salida_horario - marcaMax
+                if diferenciaHorarioIn < diferenciaHorarioOut:
+                    tipoEntrada = 'In'
+                elif diferenciaHorarioIn > diferenciaHorarioOut:
+                    tipoEntrada = 'Out'
+                else:
+                    tipoEntrada = None
+                crearMarca(dia_horario_actual,empleado, marcaMax, tipoEntrada)
             else:
-                tipoEntrada = None
-            crearMarca(dia_horario_actual,empleado, marcaMax, tipoEntrada)
-        else:
-            crearMarca(dia_horario_actual,empleado, marcaMin, 'In')
-            crearMarca(dia_horario_actual,empleado, marcaMax, 'Out')
-        for marca in marcas_dt:
-            if marca!= marcaMax and marca!= marcaMin and igual != True:
-                crearMarca(dia_horario_actual,empleado, marca, None)
+                crearMarca(dia_horario_actual,empleado, marcaMin, 'In')
+                crearMarca(dia_horario_actual,empleado, marcaMax, 'Out')
+            for marca in marcas_dt:
+                if marca!= marcaMax and marca!= marcaMin and igual != True:
+                    crearMarca(dia_horario_actual,empleado, marca, None)
 def validarHorario(row, empleado, horarios_df):
     # implementar logica en un futuro para evitar entradas duplicadas el mismo dia
     horarios = Horario.objects.filter(empleado=empleado,esActual=True)
@@ -165,10 +175,10 @@ def validarHorario(row, empleado, horarios_df):
         if isinstance(valor_columna_out, datetime):
             valor_columna_out = valor_columna_out.strftime('%H:%M:%S')
         
-        if valor_columna_in != diaHorario.horaEntrada or valor_columna_out != diaHorario.horaSalida:
-            print(f'Empleado: {empleado.nombreCompleto} - ID: {empleado.idEmpleado}')
-            print(f'Horario Nuevo: {horario.id} - Dia: {dia} - In: {valor_columna_in} - Out: {valor_columna_out}')
-            print(f'Horario viejo: {horario.id} - Dia: {dia} - In: {diaHorario.horaEntrada} - Out: {diaHorario.horaSalida}')
+        if str(valor_columna_in) != str(diaHorario.horaEntrada) or str(valor_columna_out) != str(diaHorario.horaSalida):
+            #print(f'Empleado: {empleado.nombreCompleto} - ID: {empleado.idEmpleado}')
+            #print(f'Horario Nuevo: {horario.id} - Dia: {dia} - In: {valor_columna_in} - Out: {valor_columna_out}')
+            #print(f'Horario viejo: {horario.id} - Dia: {dia} - In: {diaHorario.horaEntrada} - Out: {diaHorario.horaSalida}')
             return True
     return False
 def leerPlanillaHorarios(horarioExcel):
@@ -178,7 +188,6 @@ def leerPlanillaHorarios(horarioExcel):
         for index, row in horarios_df.iloc[1:].iterrows():
             empleado = crearEmpleadoFila(row)
             if validarHorario(row, empleado,horarios_df) ==True:
-                print('No es igual')
                 crearHorarioFila(row,horarios_df,empleado)
 def leerPlanillaMarcas(marcasExcel):
 

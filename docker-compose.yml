@@ -13,3 +13,4 @@ services:
           - LC_ALL=es_AR.UTF-8
         volumes:
             - .:/ITS-Asistencias
+            
