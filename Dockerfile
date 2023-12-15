@@ -14,13 +14,9 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # Establece el directorio de trabajo
 WORKDIR /ITS-Asistencias/ITS-Asistencias
 
-
-
 RUN apt-get update && apt-get install -y supervisor
-RUN apt-get install -y nginx
 
 # Copia la configuración de Nginx al contenedor
-COPY nginx.conf /etc/nginx/conf.d/django.conf
 
 COPY supervisord.conf /supervisord.conf
 # Copia el resto de los archivos del proyecto

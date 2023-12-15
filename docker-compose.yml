@@ -6,7 +6,7 @@ services:
         build:
             context: .
         ports:
-            - "8000:8000"
+            - "8025:8000"
         environment:
           - LANG=es_AR.UTF-8
           - LANGUAGE=es_AR:es
