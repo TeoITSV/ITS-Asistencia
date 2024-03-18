@@ -1,9 +1,12 @@
+from datetime import datetime
 from django import forms
 from asistencias.models import Empleado
 class UploadForm(forms.Form):
     horarios_file = forms.FileField(
         label='Archivo de Horarios (xlsx)',
-        widget=forms.ClearableFileInput(attrs={'style': 'opacity: 0; position: absolute; z-index: -1;','id': 'horarios_file_input'}),
+        widget=forms.ClearableFileInput(attrs={'style': 'opacity: 0; position: absolute; z-index: -1;','id': 'horarios_file_input'},
+        ),
+        required=False
     )
     
     marcas_file = forms.FileField(
@@ -22,6 +25,7 @@ class InformeForm(forms.Form):
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'id': 'fechaInicio', 'required': True}),
         required=True
     )
+    
     fechaFin = forms.DateField(
         label='Fecha Fin',
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'id': 'fechaFin'}),
@@ -54,3 +58,7 @@ class InformeForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(InformeForm, self).__init__(*args, **kwargs)
         self.fields['empleados'].choices = [(empleado.idEmpleado, empleado.nombreCompleto) for empleado in Empleado.objects.filter(estaActivo=True)]
+        today = datetime.today()
+        first_day_of_month = today.replace(day=1)
+        self.fields['fechaInicio'].initial = first_day_of_month.date()
+        self.fields['fechaFin'].initial = today.date()

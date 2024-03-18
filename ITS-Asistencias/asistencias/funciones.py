@@ -2,7 +2,7 @@ from datetime import datetime, timedelta,time
 import json
 import locale
 import openpyxl
-
+from django.db.models import Min,Max
 import pytz
 from asistencias.models import *
 from django.utils import timezone
@@ -66,7 +66,6 @@ def crearHorarioFila(row,horarios_df, empleado):
         columna_out = horarios_df.columns[posicion_columna_in + 1] if posicion_columna_in < len(horarios_df.columns) - 1 else None
         valor_columna_out = row[columna_out] if columna_out is not None else None
         #Aca se crea el Horario con sus diaHorario
-        #faltaria una validacion para no crear horarios duplicados
         crearDiaHorario(horario,dia,valor_columna_in,valor_columna_out)
 
 
@@ -76,11 +75,10 @@ def crearMarca(diaHorario,empleado, fechaHora, tipoMarca):
     else:
         tipoMarca = None
     marca, created = Marca.objects.get_or_create(diaHorario=diaHorario,empleado=empleado,fechaHora=timezone.make_aware(fechaHora),tipoMarca=tipoMarca)
-    marcas = Marca.objects.filter(diaHorario=diaHorario,empleado=empleado,fechaHora=timezone.make_aware(fechaHora))
     if created:
         marca.save()
-        return marca
-    return marca
+        return marca, created
+    return marca, created
 def parseMarcas(df):
     
     # Crea un diccionario para almacenar las marcas de tiempo por fecha
@@ -105,6 +103,7 @@ def parseMarcas(df):
     marcasEmpleadoPorDia = [{'ID de usuario': k, 'Nombre': v['Nombre'], 'marcas': v['marcas']} for k, v in data_dict.items()]
     return marcasEmpleadoPorDia
 def crearMarcaEmpleado(empleado, dicMarcas):
+    marcasCreadas = []
     # Se busca el horario actual del empleado
     horario_actual = Horario.objects.filter(empleado=empleado,esActual=True).latest('fechaCreacion')
     for dia, marcas in dicMarcas['marcas'].items():
@@ -121,7 +120,6 @@ def crearMarcaEmpleado(empleado, dicMarcas):
         if dia_horario_actual.horaEntrada is not None and dia_horario_actual.horaSalida is not None:
             hora_entrada_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaEntrada)
             hora_salida_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaSalida)
-    # aa
             marcaMax = max(marcas_dt)
             marcaMin = min(marcas_dt)
             tipoEntrada = None
@@ -136,13 +134,21 @@ def crearMarcaEmpleado(empleado, dicMarcas):
                     tipoEntrada = 'Out'
                 else:
                     tipoEntrada = None
-                crearMarca(dia_horario_actual,empleado, marcaMax, tipoEntrada)
+                marca,created = crearMarca(dia_horario_actual,empleado, marcaMax, tipoEntrada)
+                if created == True:
+                        marcasCreadas.append(marca)
             else:
-                crearMarca(dia_horario_actual,empleado, marcaMin, 'In')
-                crearMarca(dia_horario_actual,empleado, marcaMax, 'Out')
+                marca1, created1 = crearMarca(dia_horario_actual,empleado, marcaMin, 'In')
+                marca2, created2 = crearMarca(dia_horario_actual,empleado, marcaMax, 'Out')
+                if created1 == True and created2 == True:
+                    marcasCreadas.append(marca1)
+                    marcasCreadas.append(marca2)
             for marca in marcas_dt:
                 if marca!= marcaMax and marca!= marcaMin and igual != True:
-                    crearMarca(dia_horario_actual,empleado, marca, None)
+                    marca, created = crearMarca(dia_horario_actual,empleado, marca, None)
+                    if created == True:
+                        marcasCreadas.append(marca)
+    return marcasCreadas
 def validarHorario(row, empleado, horarios_df):
     # implementar logica en un futuro para evitar entradas duplicadas el mismo dia
     horarios = Horario.objects.filter(empleado=empleado,esActual=True)
@@ -176,30 +182,41 @@ def validarHorario(row, empleado, horarios_df):
             valor_columna_out = valor_columna_out.strftime('%H:%M:%S')
         
         if str(valor_columna_in) != str(diaHorario.horaEntrada) or str(valor_columna_out) != str(diaHorario.horaSalida):
-            #print(f'Empleado: {empleado.nombreCompleto} - ID: {empleado.idEmpleado}')
-            #print(f'Horario Nuevo: {horario.id} - Dia: {dia} - In: {valor_columna_in} - Out: {valor_columna_out}')
-            #print(f'Horario viejo: {horario.id} - Dia: {dia} - In: {diaHorario.horaEntrada} - Out: {diaHorario.horaSalida}')
             return True
     return False
 def leerPlanillaHorarios(horarioExcel):
-    if horarioExcel:
+    try:
         horarios_df = pd.read_excel(horarioExcel)
         horarios_df = horarios_df.where(pd.notna(horarios_df), "vacio")
+        empleados = []
         for index, row in horarios_df.iloc[1:].iterrows():
             empleado = crearEmpleadoFila(row)
             if validarHorario(row, empleado,horarios_df) ==True:
                 crearHorarioFila(row,horarios_df,empleado)
+                empleados.append(empleado.nombreCompleto)
+        if len(empleados) > 0:
+            return True, f"Se cargaron los horarios nuevos para los empleados: {', '.join(empleados)}"
+        else:
+            return True, f'Se cargo la planilla exitosamente pero no hubo cambios con los horarios viejos.'
+    except FileNotFoundError:
+        return False, 'No se selecciono ningun archivo de horarios.'
+    except Exception as e:
+        return False, (f"Se produjo un error al leer el archivo Excel: {e}")
 def leerPlanillaMarcas(marcasExcel):
-
-    if marcasExcel:
+    try:
         # Lee el archivo Excel
+        marcasCreadas = []
         df = pd.read_excel(marcasExcel)
         marcasEmpleadoPorDia = parseMarcas(df)
         for x in marcasEmpleadoPorDia:
             empleado = crearEmpleadoFila(x)
-            crearMarcaEmpleado(empleado,x)
+            marcasCreadas += crearMarcaEmpleado(empleado,x)
         # Convierte el diccionario a una lista de diccionarios
-
+        return True, f'Se cargaron {len(marcasCreadas)} marcas'
+    except FileNotFoundError:
+        return False, 'No se selecciono ningun archivo de marcas.'
+    except Exception as e:
+        return False, (f"Se produjo un error al leer el archivo Excel: {e}")
 def calcInformeEmpleado(empleado,fechaInicio,fechaFin,margenEntrada):
     marcas = Marca.objects.filter(empleado=empleado,fechaHora__range=[fechaInicio, fechaFin]).order_by('fechaHora')
     llegadasTarde = []
@@ -207,6 +224,7 @@ def calcInformeEmpleado(empleado,fechaInicio,fechaFin,margenEntrada):
     zona_horaria_argentina = timezone.get_default_timezone()  # O usa timezone.pytz.timezone('America/Argentina/Buenos_Aires')
 
     for marca in marcas:
+        marca.fechaHora = marca.fechaHora.replace(tzinfo=zona_horaria_argentina)
         if marca.tipoMarca is not None and marca.diaHorario is not None:
             if marca.tipoMarca.nombre == 'In':
                 fecha_entrada = datetime.combine(marca.fechaHora.date(), marca.diaHorario.horaEntrada)
@@ -216,10 +234,13 @@ def calcInformeEmpleado(empleado,fechaInicio,fechaFin,margenEntrada):
 
                 # Sumar el margen directamente a la fecha y hora de entrada
                 fechaHoraInHorario = fecha_entrada_con_zona + timedelta(minutes=margenEntrada.minute, seconds=margenEntrada.second)
+                
                 if (marca.fechaHora - timedelta(minutes=1)).replace(second=0) > fechaHoraInHorario:
                     diferencia_tiempo = marca.fechaHora - fechaHoraInHorario
+                    #print(f'Empleado: {empleado.nombreCompleto} - ID: {empleado.idEmpleado}- marca: {marca.fechaHora} - horaIn: {fechaHoraInHorario} - Diferencia: {diferencia_tiempo}')
                     marca.diferenciaFalta = diferencia_tiempo
                     llegadasTarde.append(marca)
+                    #print(f'Empleado: {empleado.nombreCompleto} - ID: {empleado.idEmpleado} ')
             elif marca.tipoMarca.nombre == 'Out':
                 fecha_salida = datetime.combine(marca.fechaHora.date(), marca.diaHorario.horaSalida)
                 
@@ -233,6 +254,19 @@ def calcInformeEmpleado(empleado,fechaInicio,fechaFin,margenEntrada):
                     marca.diferenciaFal = diferencia_tiempo
                     retirosFueradeHora.append(marca)
     return llegadasTarde , retirosFueradeHora
+def calcStats():
+    date_max = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha']
+    date_min = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha']
+    margenEntrada = time(0,1,0)
+    total_retrasos = 0
+    total_salidas_tempranas = 0
+    
+    for empleado in Empleado.objects.all():
+        retrasos_empleado,empleado_salidas_tempranas = calcInformeEmpleado(empleado,date_min,date_max,margenEntrada)
+        total_retrasos+=len(retrasos_empleado)
+        total_salidas_tempranas+=len(empleado_salidas_tempranas)
+    return total_retrasos, total_salidas_tempranas
+
 
 def descargarInformeExcel(empleados):
     # Crear un nuevo libro de trabajo

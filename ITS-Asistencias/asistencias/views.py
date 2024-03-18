@@ -8,7 +8,8 @@ import pandas as pd
 
 
 def home_view(request):
-    return render(request, 'stats.html')
+    total_retrasos, total_salidas_tempranas = calcStats()
+    return render(request, 'stats.html',{'total_empleados': Empleado.objects.count(), 'total_marcas': Marca.objects.count(),'total_retrasos': total_retrasos, 'total_salidas_anticipadas': total_salidas_tempranas})
 
 def form_view(request):
     return render(request, 'form.html')
@@ -16,13 +17,22 @@ def form_view(request):
 def upload_files(request):
     if request.method == 'POST':
         form = UploadForm(request.POST, request.FILES)
+
         if form.is_valid():
             horarios_file = form.cleaned_data['horarios_file']
             marcas_file = form.cleaned_data['marcas_file']
-            leerPlanillaHorarios(horarios_file)
-            leerPlanillaMarcas(marcas_file)
-            success_flag = True
-            return render(request, 'form.html', {'form': form, 'success_flag': success_flag})
+            if horarios_file:
+                successHorarios, messageHorarios = leerPlanillaHorarios(horarios_file)
+            else:
+                successHorarios = True
+                messageHorarios = f'No se modifico ningun Horario. \n'
+            successMarcas, messageMarcas = leerPlanillaMarcas(marcas_file)
+            if successHorarios == True and successMarcas == True:
+                success_flag = True
+            else:
+                success_flag = False
+            message = f"{messageHorarios}. \n {messageMarcas}"
+            return render(request, 'form.html', {'form': form, 'success_flag': success_flag,'message': message})
     else:
         # Si hay parámetros en la URL, intenta prellenar el formulario
         form = UploadForm(initial={

@@ -1,0 +1,286 @@
+body {
+  transition: background-color 0.5s;
+  color: #000000; /* Color de texto predeterminado en el tema claro */
+}
+
+.light-theme {
+  background-color: #ffffff;
+  color: #000000; /* Color de texto en el tema claro */
+}
+.dark-theme .span {
+  color: #000000;
+}
+.dark-theme {
+  background-color: #333333;
+  color: #ffffff; /* Color de texto en el tema oscuro */
+}
+
+#theme-toggle {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+#toggle-container {
+  width: 50px;
+  height: 25px;
+  background-color: #dddddd;
+  display: flex;
+  align-items: center;
+  border-radius: 25px;
+  padding: 2px;
+}
+
+#toggle-circle {
+  width: 21px;
+  height: 21px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.5s;
+}
+
+#toggle-circle i {
+  font-size: 12px;
+}
+
+.navbar-light {
+  background-color: #f8f9fa !important;
+  color: #000000 !important;
+}
+
+.navbar-light .navbar-brand {
+  color: #000000 !important;
+}
+
+.navbar-dark {
+  background-color: #343a40 !important;
+  color: #ffffff !important;
+}
+
+.navbar-dark .navbar-brand {
+  color: #ffffff !important;
+}
+
+.dark-theme .navbar-light {
+  background-color: #343a40 !important;
+  color: #000000 !important;
+}
+
+.dark-theme .navbar-light .navbar-brand {
+  color: #ffffff !important;
+}
+
+.dark-theme .navbar-dark {
+  background-color: #343a40 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .navbar-dark .navbar-brand {
+  color: #ffffff !important;
+}
+
+.dark-theme #toggle-circle {
+  transform: translateX(26px);
+}
+.light-theme .modal-content {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+table.dataTable {
+  padding: auto;
+  margin: auto;
+  border-collapse: collapse;
+}
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing,
+.dataTables_wrapper .dataTables_paginate {
+  color: #000000; /* Color de texto en negro */
+}
+
+table.dataTable thead th {
+  background-color: #f8f9fa; /* Color de fondo del encabezado */
+  border-color: #e9ecef; /* Color del borde del encabezado (gris claro) */
+  color: #000000; /* Color de texto del encabezado */
+}
+
+table.dataTable tbody td {
+  background-color: #ffffff; /* Color de fondo de las celdas */
+  border-color: #e9ecef; /* Color del borde de las celdas (gris claro) */
+  color: #000000; /* Color de texto de las celdas */
+}
+
+table.dataTable tbody tr:hover {
+  background-color: #f1f1f1; /* Color de fondo al pasar el mouse sobre una fila */
+}
+
+table.dataTable.no-footer {
+  border-bottom: 1px solid #e9ecef; /* Borde inferior si no hay pie de página (gris claro) */
+}
+
+table.dataTable.paginate_button {
+  background-color: #f8f9fa; /* Color de fondo de los botones de paginación */
+  border-color: #e9ecef; /* Color del borde de los botones de paginación (gris claro) */
+  color: #000000; /* Color de texto de los botones de paginación */
+}
+
+table.dataTable.paginate_button:hover {
+  background-color: #e9ecef; /* Color de fondo al pasar el mouse sobre los botones de paginación */
+}
+
+.dataTables_wrapper .dataTables_paginate {
+  color: #000000; /* Color de texto en negro */
+}
+
+.dataTables_paginate.paging_simple_numbers .paginate_button {
+  background-color: #f8f9fa; /* Color de fondo de los botones de paginación */
+  border-color: #e9ecef; /* Color del borde de los botones de paginación (gris claro) */
+  color: #000000; /* Color de texto de los botones de paginación */
+}
+
+.dataTables_wrapper .dataTables_filter input {
+  background-color: #ffffff; /* Color de fondo del campo de búsqueda */
+  border-color: #e9ecef; /* Color del borde del campo de búsqueda (gris claro) */
+  color: #000000; /* Color de texto del campo de búsqueda */
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_length select {
+  color: #000000; /* Color de texto en negro */
+}
+.dark-theme .paginate_button {
+  color: #ffffff; /* Color de texto en blanco */
+}
+.dark-theme .dataTables_paginate.paging_simple_numbers .paginate_button {
+  color: #ffffff; /* Color de texto en blanco */
+}
+/* Estilos DataTable en tema oscuro */
+.dark-theme table.dataTable {
+  color: #ffffff; /* Color de texto predeterminado */
+}
+
+.dark-theme table.dataTable thead th {
+  background-color: #343a40; /* Color de fondo del encabezado */
+  border-color: #1c1e20; /* Color del borde del encabezado (gris oscuro) */
+  color: #ffffff; /* Color de texto del encabezado */
+}
+
+.dark-theme table.dataTable tbody td {
+  background-color: #444c52; /* Color de fondo de las celdas */
+  border-color: #1c1e20; /* Color del borde de las celdas (gris oscuro) */
+  color: #ffffff; /* Color de texto de las celdas */
+}
+
+.dark-theme table.dataTable tbody tr:hover {
+  background-color: #52585b; /* Color de fondo al pasar el mouse sobre una fila */
+}
+
+.dark-theme table.dataTable.no-footer {
+  border-bottom: 1px solid #1c1e20; /* Borde inferior si no hay pie de página (gris oscuro) */
+}
+.dark-theme .dataTables_info {
+  color: #ffffff; /* Color de texto en blanco */
+}
+
+.dark-theme .dataTables_wrapper .dataTables_paginate .paginate_button:active {
+  color: #ffffff; /* Color de texto en blanco */
+}
+.dark-theme table.dataTable.paginate_button {
+  background-color: #343a40; /* Color de fondo de los botones de paginación */
+  border-color: #1c1e20; /* Color del borde de los botones de paginación (gris oscuro) */
+  color: #ffffff !important; /* Color de texto de los botones de paginación */
+}
+.dark-theme table.dataTable.paginate_button {
+  background-color: #343a40; /* Color de fondo de los botones de paginación */
+  border-color: #1c1e20; /* Color del borde de los botones de paginación (gris oscuro) */
+  color: #ffffff; /* Color de texto de los botones de paginación */
+}
+
+.dark-theme table.dataTable.paginate_button:hover {
+  background-color: #444c52; /* Color de fondo al pasar el mouse sobre los botones de paginación */
+}
+.dark-theme .dataTables_wrapper .dataTables_paginate {
+  color: #ffffff;
+}
+.dark-theme .dataTables_paginate.paging_simple_numbers {
+  color: #ffffff; /* Color de texto en blanco */
+}
+.dark-theme .dataTables_wrapper .dataTables_paginate .paginate_button {
+  background-color: #343a40; /* Color de fondo de los botones de paginación */
+  border-color: #1c1e20; /* Color del borde de los botones de paginación (gris oscuro) */
+  color: #ffffff; /* Color de texto de los botones de paginación */
+}
+
+.dark-theme .dataTables_wrapper .dataTables_filter input {
+  background-color: #444c52; /* Color de fondo del campo de búsqueda */
+  border-color: #1c1e20; /* Color del borde del campo de búsqueda (gris oscuro) */
+  color: #ffffff; /* Color de texto del campo de búsqueda */
+}
+.dark-theme .dataTables_wrapper .dataTables_filter {
+  color: #ffffff;
+}
+.dark-theme .dataTables_wrapper .dataTables_length {
+  color: #ffffff;
+}
+
+.dark-theme .dataTables_wrapper .dataTables_length select {
+  background-color: #444c52; /* Color de fondo del campo de selección de longitud */
+  border-color: #1c1e20; /* Color del borde del campo de selección de longitud (gris oscuro) */
+  color: #ffffff; /* Color de texto del campo de selección de longitud */
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 1000;
+}
+
+.overlay.dark-theme {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.dark-theme .card {
+  color: #000000;
+  border-color: #1c1e20;
+  background-color: #444c52;
+}
+
+.dark-theme .card-header {
+  background-color: #343a40;
+  color: #ffffff;
+}
+.dark-theme .card-body {
+  background-color: #444c52;
+  color: #ffffff;
+}
+.dark-theme .card-footer {
+  background-color: #343a40;
+  color: #ffffff;
+}
+.dark-theme .card-title {
+  color: #ffffff;
+}
+.dark-theme .card-text {
+  color: #ffffff;
+}
+.dark-theme .card-link {
+  color: #ffffff;
+}
+.dark-theme .card-subtitle {
+  color: #ffffff;
+}
+.dark-theme .text {
+  color: #ffffff;
+}

@@ -4,21 +4,21 @@
 <h2 class="mb-4">Generar Informe Excel</h2>
 <form method="post" id="informeForm">
     {% csrf_token %}
-        <div class="form-group{% if form.fechaInicio.errors %} has-error{% endif %}">
+    <div class="form-group{% if form.fechaInicio.errors %} has-error{% endif %}">
         {{ form.fechaInicio.label_tag }}
-        {{ form.fechaInicio }}
+        <input type="date" class="form-control" id="fechaInicio" name="fechaInicio" value="{{ form.fechaInicio.initial|date:'Y-m-d' }}" required>
         {% if form.fechaInicio.errors %}
-          <span class="text-danger">{{ form.fechaInicio.errors }}</span>
+            <span class="text-danger">{{ form.fechaInicio.errors }}</span>
         {% endif %}
-      </div>
-
-      <div class="form-group{% if form.fechaFin.errors %} has-error{% endif %}">
+    </div>
+    
+    <div class="form-group{% if form.fechaFin.errors %} has-error{% endif %}">
         {{ form.fechaFin.label_tag }}
-        {{ form.fechaFin }}
+        <input type="date" class="form-control" id="fechaFin" name="fechaFin" value="{{ form.fechaFin.initial|date:'Y-m-d' }}" required>
         {% if form.fechaFin.errors %}
-          <span class="text-danger">{{ form.fechaFin.errors }}</span>
+            <span class="text-danger">{{ form.fechaFin.errors }}</span>
         {% endif %}
-      </div>
+    </div>
       <div class="form-group{% if form.minutos.errors or form.segundos.errors %} has-error{% endif %}">
         <label class="control-label" for="{{ form.minutos.id_for_label }}">Margen de Entrada:</label>
         
@@ -47,14 +47,14 @@
         <table id="empleadosTable" class="table table-striped table-bordered dataTable" style="width:100%">
             <thead>
                 <tr>
-                    <th>Seleccionar</th>
+                    <th style="width: 10%;">Seleccionar</th>
                     <th>Nombre del Empleado</th>
                 </tr>
             </thead>
             <tbody>
                 {% for empleado_id, empleado_nombre in form.fields.empleados.choices %}
                     <tr>
-                        <td class="text-center">
+                        <td class="text-center" style="width: 10%;">
                             <div class="custom-control custom-checkbox ">
                                 <input type="checkbox" class="custom-control-input" name="empleados" value="{{ empleado_id }}" id="checkbox{{ empleado_id }}">
                                 <label class="custom-control-label al" for="checkbox{{ empleado_id }}"></label>
@@ -67,7 +67,7 @@
         </table>
     </div>
 
-    <button type="submit" class="btn btn-primary">Enviar</button>
+    <button type="submit" class="btn btn-primary mb-3 ">Enviar</button>
 </form>
 <!-- Modal de éxito -->
 <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -88,7 +88,198 @@
         </div>
     </div>
 </div>
-
+<div id="overlay" class="overlay">
+    <div class="socket">
+        <div class="gel center-gel">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c1 r1">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c2 r1">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c3 r1">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c4 r1">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c5 r1">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c6 r1">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        
+        <div class="gel c7 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        
+        <div class="gel c8 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c9 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c10 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c11 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c12 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c13 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c14 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c15 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c16 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c17 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c18 r2">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c19 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c20 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c21 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c22 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c23 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c24 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c25 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c26 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c28 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c29 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c30 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c31 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c32 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c33 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c34 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c35 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c36 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        <div class="gel c37 r3">
+            <div class="hex-brick h1"></div>
+            <div class="hex-brick h2"></div>
+            <div class="hex-brick h3"></div>
+        </div>
+        
+    </div>
+  </div>
 <script>
     $(document).ready(function() {
         $('#form-id').submit(function(e) {
@@ -191,5 +382,30 @@
         // Configurar DataTable al cargar la página
         setupDataTable();
     });
+    function mostrarOverlay() {
+    document.getElementById('overlay').style.display = 'block';
+  }
+
+  // Función para ocultar el overlay
+  function ocultarOverlay() {
+    document.getElementById('overlay').style.display = 'none';
+  }
+
+  // Evento de envío del formulario
+  document.getElementById('informeForm').addEventListener('submit', function () {
+    mostrarOverlay();
+    setTimeout(function () {
+        var respuestaExitosa = true;
+
+        if (respuestaExitosa) {
+          ocultarOverlay();
+        } else {
+          // Maneja el caso de una respuesta fallida si es necesario
+          console.error('La solicitud falló');
+        }
+      }, 1000); // Simulamos un tiempo de espera de 2 segundos
+  }
+  );
+
 </script>
 {% endblock %}
