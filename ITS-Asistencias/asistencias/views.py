@@ -9,7 +9,32 @@ import pandas as pd
 
 def home_view(request):
     total_retrasos, total_salidas_tempranas = calcStats()
-    return render(request, 'stats.html',{'total_empleados': Empleado.objects.count(), 'total_marcas': Marca.objects.count(),'total_retrasos': total_retrasos, 'total_salidas_anticipadas': total_salidas_tempranas})
+    labels = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+      'RIP',
+    ]  # Ejemplo de etiquetas para el eje X
+    data_list = [
+          0, 10000, 5000, 15000, 10000, 20000, 15000, 25000, 20000, 30000,
+          25000, 40000,10
+        ]  # Ejemplo de datos para el eje Y
+
+    # Convierte los datos a formato JSON
+    return render(request, 'stats.html',{'total_empleados': Empleado.objects.count(),
+                                          'total_marcas': Marca.objects.count(),
+                                          'total_retrasos': total_retrasos,
+                                        'total_salidas_anticipadas': total_salidas_tempranas,
+                                        'labels': labels, 'data_list': data_list})
 
 def form_view(request):
     return render(request, 'form.html')
