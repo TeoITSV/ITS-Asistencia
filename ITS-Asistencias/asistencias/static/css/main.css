@@ -260,6 +260,7 @@ table.dataTable.paginate_button:hover {
 .dark-theme .card-header {
   background-color: #343a40;
   color: #ffffff;
+  border-bottom: 1px #52585b;
 }
 .dark-theme .card-body {
   background-color: #444c52;
