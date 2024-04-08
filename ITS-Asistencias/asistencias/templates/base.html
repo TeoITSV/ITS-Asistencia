@@ -69,12 +69,14 @@
                 body.classList.add(savedTheme);
                 toggleCircle.innerHTML = savedTheme === 'dark-theme' ? '<i class="bi bi-moon-stars-fill"></i>' : '<i class="bi bi-sun-fill"></i>';
             }
+
     
             toggleButton.addEventListener('click', function () {
                 body.classList.toggle('dark-theme');
                 const currentTheme = body.classList.contains('dark-theme') ? 'dark-theme' : '';
+                var ctx = document.getElementById('myAreaChart');
                 toggleCircle.innerHTML = currentTheme ? '<i class="bi bi-moon-stars-fill"></i>' : '<i class="bi bi-sun-fill"></i>';
-    
+                
                 // Guardar el tema seleccionado en localStorage
                 localStorage.setItem('theme', currentTheme);
             });

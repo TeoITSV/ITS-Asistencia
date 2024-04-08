@@ -10,7 +10,6 @@
       class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
     >
       <h6 class="m-0 font-weight-bold text-primary">Incumplimientos</h6>
-      
     </div>
     <!-- Card Body -->
     <div class="card-body">
@@ -21,130 +20,153 @@
   </div>
 </div>
 <script>
-(Chart.defaults.global.defaultFontFamily = 'Nunito'),
-  '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
-Chart.defaults.global.defaultFontColor = '#858796';
-  function loadChart() {
-    var ctx = document.getElementById('myAreaChart');
-    if (ctx == null) return;
-    var myLineChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        // labels: [{% for label in labels %}"{{ label }}",{% endfor %}],
-        labels: [
-          'Enero',
-          'Febrero',
-          'Marzo',
-          'Abril',
-          'Mayo',
-          'Junio',
-          'Julio',
-          'Agosto',
-          'Septiembre',
-          'Octubre',
-          'Noviembre',
-          'Diciembre',
-        ],
-        datasets: [
+  (Chart.defaults.global.defaultFontFamily = 'Nunito'),
+    '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+  Chart.defaults.global.defaultFontColor = '#858796';
+  var ctx = document.getElementById('myAreaChart');
+  var myLineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      // labels: [{% for label in labels %}"{{ label }}",{% endfor %}],
+      labels: [
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre',
+      ],
+      datasets: [
+        {
+          label: 'Incumplimientos',
+          lineTension: 0.3,
+          backgroundColor: 'rgba(78, 115, 223, 0.05)',
+          borderColor: 'rgba(78, 115, 223, 1)',
+          pointRadius: 3,
+          pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+          pointBorderColor: 'rgba(78, 115, 223, 1)',
+          pointHoverRadius: 3,
+          pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+          pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+          pointHitRadius: 10,
+          pointBorderWidth: 2,
+          // data: [{% for data in data_list %}{{ data }},{% endfor %}],
+          data: [
+            0, 10000, 5000, 15000, 10000, 20000, 15000, 25000, 20000, 30000,
+            25000, 40000,
+          ],
+        },
+      ],
+    },
+    options: {
+      maintainAspectRatio: false,
+      layout: {
+        padding: {
+          left: 10,
+          right: 25,
+          top: 25,
+          bottom: 0,
+        },
+      },
+      scales: {
+        xAxes: [
           {
-            label: 'Earnings',
-            lineTension: 0.3,
-            backgroundColor: 'rgba(78, 115, 223, 0.05)',
-            borderColor: 'rgba(78, 115, 223, 1)',
-            pointRadius: 3,
-            pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-            pointBorderColor: 'rgba(78, 115, 223, 1)',
-            pointHoverRadius: 3,
-            pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
-            pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
-            pointHitRadius: 10,
-            pointBorderWidth: 2,
-            // data: [{% for data in data_list %}{{ data }},{% endfor %}],
-            data: [
-              0, 10000, 5000, 15000, 10000, 20000, 15000, 25000, 20000, 30000,
-              25000, 40000,
-            ],
+            time: {
+              unit: 'date',
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false,
+            },
+            ticks: {
+              fontColor: 'black',
+              maxTicksLimit: 6,
+            },
+          },
+        ],
+        yAxes: [
+          {
+            ticks: {
+              fontColor: 'black',
+              maxTicksLimit: 5,
+              padding: 10,
+              callback: function (value, index, values) {
+                return number_format(value);
+              },
+            },
+            gridLines: {
+              color: 'rgb(234, 236, 244)',
+              zeroLineColor: 'rgb(234, 236, 244)',
+              drawBorder: false,
+              borderDash: [2],
+              zeroLineBorderDash: [2],
+            },
           },
         ],
       },
-      options: {
-        maintainAspectRatio: false,
-        layout: {
-          padding: {
-            left: 10,
-            right: 25,
-            top: 25,
-            bottom: 0,
-          },
-        },
-        scales: {
-          xAxes: [
-            {
-              time: {
-                unit: 'date',
-              },
-              gridLines: {
-                display: false,
-                drawBorder: false,
-              },
-              ticks: {
-                fontColor: 'grey',
-                maxTicksLimit: 6,
-              },
-            },
-          ],
-          yAxes: [
-            {
-              ticks: {
-                fontColor: 'green',
-                maxTicksLimit: 5,
-                padding: 10,
-                // Include a dollar sign in the ticks
-                callback: function (value, index, values) {
-                  return number_format(value);
-                },
-              },
-              gridLines: {
-                color: 'rgb(234, 236, 244)',
-                zeroLineColor: 'rgb(234, 236, 244)',
-                drawBorder: false,
-                borderDash: [2],
-                zeroLineBorderDash: [2],
-              },
-            },
-          ],
-        },
-        legend: {
-          display: false,
-        },
-        tooltips: {
-          backgroundColor: 'rgb(255,255,255)',
-          bodyFontColor: '#858796',
-          titleMarginBottom: 10,
-          titleFontColor: '#6e707e',
-          titleFontSize: 14,
-          borderColor: '#dddfeb',
-          borderWidth: 1,
-          xPadding: 15,
-          yPadding: 15,
-          displayColors: false,
-          intersect: false,
-          mode: 'index',
-          caretPadding: 10,
-          callbacks: {
-            label: function (tooltipItem, chart) {
-              var datasetLabel =
-                chart.datasets[tooltipItem.datasetIndex].label || '';
-              return datasetLabel + ': ' + number_format(tooltipItem.yLabel);
-            },
+      legend: {
+        display: false,
+      },
+      tooltips: {
+        backgroundColor: 'rgb(255,255,255)',
+        bodyFontColor: '#858796',
+        titleMarginBottom: 10,
+        titleFontColor: '#6e707e',
+        titleFontSize: 14,
+        borderColor: '#dddfeb',
+        borderWidth: 1,
+        xPadding: 15,
+        yPadding: 15,
+        displayColors: false,
+        intersect: false,
+        mode: 'index',
+        caretPadding: 10,
+        callbacks: {
+          label: function (tooltipItem, chart) {
+            var datasetLabel =
+              chart.datasets[tooltipItem.datasetIndex].label || '';
+            return datasetLabel + ': ' + number_format(tooltipItem.yLabel);
           },
         },
       },
-    });
-    myLineChart.options.scales.xAxes[0].ticks.fontColor = 'white';
-	myLineChart.options.scales.yAxes[0].ticks.fontColor = 'white';
-    myLineChart.update();
-  }
+    },
+  });
+  const body = document.body;
+  const toggleButton = document.getElementById('theme-toggle');
+  const toggleCircle = document.getElementById('toggle-circle');
+  document.addEventListener('DOMContentLoaded', function () {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      body.classList.add(savedTheme);
+      if (body.classList.contains('dark-theme')) {
+        myLineChart.options.scales.xAxes[0].ticks.fontColor = 'white';
+        myLineChart.options.scales.yAxes[0].ticks.fontColor = 'white';
+        myLineChart.update();
+      } else {
+        myLineChart.options.scales.xAxes[0].ticks.fontColor = 'black';
+        myLineChart.options.scales.yAxes[0].ticks.fontColor = 'black';
+        myLineChart.update();
+      }
+    }
+  });
+  toggleButton.addEventListener('click', function () {
+    if (body.classList.contains('dark-theme')) {
+      myLineChart.options.scales.xAxes[0].ticks.fontColor = 'black';
+      myLineChart.options.scales.yAxes[0].ticks.fontColor = 'black';
+      myLineChart.update();
+      console.log('aaaa');
+    } else {
+      myLineChart.options.scales.xAxes[0].ticks.fontColor = 'white';
+      myLineChart.options.scales.yAxes[0].ticks.fontColor = 'white';
+      myLineChart.update();
+    }
+  });
 
   function number_format(number, decimals, dec_point, thousands_sep) {
     number = (number + '').replace(',', '').replace(' ', '');
@@ -167,6 +189,5 @@ Chart.defaults.global.defaultFontColor = '#858796';
     }
     return s.join(dec);
   }
-  loadChart();
 </script>
 {% endblock %}
