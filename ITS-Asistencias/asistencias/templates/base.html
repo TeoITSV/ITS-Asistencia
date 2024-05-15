@@ -42,9 +42,12 @@
         <a class="navbar-brand mr-4" href="{% url 'base' %}"><i class="fas fa-home"></i> Sistema de asistencia</a>
         <a class="navbar-brand mr-4" href="{% url 'upload_files' %}"><i class="fas fa-upload"></i> Cargar Datos</a>
         <a class="navbar-brand mr-4" href="{% url 'informe_pdf' %}"><i class="fas fa-file-pdf"></i> Informe</a>
-        <div id="theme-toggle">
-            <div id="toggle-container">
-                <div id="toggle-circle"><i class="bi bi-sun-fill"></i></div>
+        <a class="navbar-brand mr-4" href="{% url 'admin:index' %}"><i class="fa-solid fa-user-tie"></i> DB Admin</a>
+        <div class="nav-item ml-auto">
+            <div id="theme-toggle">
+                <div id="toggle-container">
+                    <div id="toggle-circle"><i class="bi bi-sun-fill"></i></div>
+                </div>
             </div>
         </div>
     </nav>

@@ -1,15 +1,35 @@
 {% block content %} {% load static %}
 <!-- End of Main Content -->
 <script src="/static/vendor/chart.js/Chart.min.js"></script>
+<style>
+.btn-circle {
+  border-radius: 30%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.3s ease-in-out;
+}
 
-<!-- Area Chart -->
+.btn-circle:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+</style>
 <div class="col-xl-8 col-lg-7">
   <div class="card shadow mb-4">
-    <!-- Card Header - Dropdown -->
-    <div
-      class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
-    >
+    <!-- Card Header - Buttons -->
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
       <h6 class="m-0 font-weight-bold text-primary">Incumplimientos</h6>
+      <div class="d-flex align-items-center">
+        <button class="btn btn-transparent btn-circle mr-2" id="prevYear">
+          <i class="bi bi-chevron-compact-left"></i>
+        </button>
+        <span class="mx-2" id="selectedYear"></span>
+        <button class="btn btn-transparent btn-circle ml-2" id="nextYear">
+          <i class="bi bi-chevron-compact-right"></i>
+        </button>
+      </div>
     </div>
     <!-- Card Body -->
     <div class="card-body">
@@ -19,11 +39,76 @@
     </div>
   </div>
 </div>
+
+<script>
+$(document).ready(function () {
+  var marcasxanio = {{marcasxanio|safe}};
+  var faltasxanio = {{faltasxanio|safe}};
+  var currentYear = new Date().getFullYear();
+  $('#selectedYear').text(currentYear);
+
+  // Convertir año de marcasxanio a entero
+  marcasxanio.forEach(function(marca) {
+    marca.year = parseInt(marca.year);
+  });
+
+  // Verificar si hay marcas para el año actual
+  var marcasParaAnioActual = marcasxanio.find((element) => element.year === currentYear);
+  var faltasParaAnioActual = faltasxanio.find((element) => element.year === currentYear);
+  if (marcasParaAnioActual === undefined) {
+    // Si no hay marcas para el año actual, actualizar currentYear al primer año con marcas
+    currentYear = marcasxanio[0].year;
+    $('#selectedYear').text(currentYear);
+    myLineChart.data.datasets[0].data = marcasxanio[0].meses.data;
+    myLineChart.data.datasets[1].data = faltasxanio[0].meses.retrasos;
+    myLineChart.data.datasets[2].data = faltasxanio[0].meses.retirosAnticipadas;
+  }else{
+    myLineChart.data.datasets[0].data = marcasParaAnioActual.meses.data;
+    myLineChart.data.datasets[1].data = faltasParaAnioActual.meses.retrasos;
+    myLineChart.data.datasets[2].data = faltasParaAnioActual.meses.retirosAnticipadas;
+  }
+  myLineChart.update();
+  // Función para actualizar el año seleccionado
+  function actualizarAnio(anio) {
+    $('#selectedYear').text(anio);
+    // Lógica para actualizar el gráfico con el año seleccionado
+    var marcasParaAnio = marcasxanio.find((element) => element.year === anio);
+    var faltasParaAnio = faltasxanio.find((element) => element.year === anio);
+    if (marcasParaAnio === undefined) {
+      // Si no hay marcas para el año seleccionado, mostrar un gráfico vacío
+      myLineChart.data.datasets[0].data = [0,0,0,0,0,0,0,0,0,0,0,0];
+      myLineChart.data.datasets[1].data = [0,0,0,0,0,0,0,0,0,0,0,0];
+      myLineChart.data.datasets[2].data = [0,0,0,0,0,0,0,0,0,0,0,0];
+    } else {
+      // Si hay marcas para el año seleccionado, mostrar el gráfico con los datos correspondientes
+
+      myLineChart.data.datasets[0].data = marcasParaAnio.meses.data;
+      myLineChart.data.datasets[1].data = faltasParaAnio.meses.retrasos;
+      myLineChart.data.datasets[2].data = faltasParaAnio.meses.retirosAnticipadas;
+      
+
+    }
+    myLineChart.update();
+  }
+
+  $('#prevYear').click(function () {
+    currentYear--;
+    actualizarAnio(currentYear);
+  });
+
+  $('#nextYear').click(function () {
+    currentYear++;
+    actualizarAnio(currentYear);
+  });
+});
+</script>
 <script>
   (Chart.defaults.global.defaultFontFamily = 'Nunito'),
     '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
   Chart.defaults.global.defaultFontColor = '#858796';
   var ctx = document.getElementById('myAreaChart');
+  frecMarcas = []
+
   var myLineChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -44,7 +129,7 @@
       ],
       datasets: [
         {
-          label: 'Incumplimientos',
+          label: 'Marcas',
           lineTension: 0.3,
           backgroundColor: 'rgba(78, 115, 223, 0.05)',
           borderColor: 'rgba(78, 115, 223, 1)',
@@ -57,11 +142,40 @@
           pointHitRadius: 10,
           pointBorderWidth: 2,
           // data: [{% for data in data_list %}{{ data }},{% endfor %}],
-          data: [
-            0, 10000, 5000, 15000, 10000, 20000, 15000, 25000, 20000, 30000,
-            25000, 40000,
-          ],
+          data: [0,0,0,0,0,0,0,0,0,0,0,0],
         },
+{
+  label: 'Retrasos',
+  lineTension: 0.3,
+  backgroundColor: 'rgba(220, 53, 69, 0.05)',
+  borderColor: 'rgba(220, 53, 69, 1)',
+  pointRadius: 3,
+  pointBackgroundColor: 'rgba(220, 53, 69, 1)',
+  pointBorderColor: 'rgba(220, 53, 69, 1)',
+  pointHoverRadius: 3,
+  pointHoverBackgroundColor: 'rgba(220, 53, 69, 1)',
+  pointHoverBorderColor: 'rgba(220, 53, 69, 1)',
+  pointHitRadius: 10,
+  pointBorderWidth: 2,
+  // data: [{% for data in data_list %}{{ data }},{% endfor %}],
+  data: [0,0,0,0,0,0,0,0,0,0,0,0],
+},
+{
+  label: 'Retiros Anticipados',
+  lineTension: 0.3,
+  backgroundColor: 'rgba(255, 193, 7, 0.05)',
+  borderColor: 'rgba(255, 193, 7, 1)',
+  pointRadius: 3,
+  pointBackgroundColor: 'rgba(255, 193, 7, 1)',
+  pointBorderColor: 'rgba(255, 193, 7, 1)',
+  pointHoverRadius: 3,
+  pointHoverBackgroundColor: 'rgba(255, 193, 7, 1)',
+  pointHoverBorderColor: 'rgba(255, 193, 7, 1)',
+  pointHitRadius: 10,
+  pointBorderWidth: 2,
+  // data: [{% for data in data_list %}{{ data }},{% endfor %}],
+  data: [0,0,0,0,0,0,0,0,0,0,0,0],
+}
       ],
     },
     options: {
@@ -75,6 +189,7 @@
         },
       },
       scales: {
+        
         xAxes: [
           {
             time: {
@@ -86,7 +201,7 @@
             },
             ticks: {
               fontColor: 'black',
-              maxTicksLimit: 6,
+              maxTicksLimit: 12,
             },
           },
         ],
@@ -94,11 +209,13 @@
           {
             ticks: {
               fontColor: 'black',
-              maxTicksLimit: 5,
+              maxTicksLimit: 7,
               padding: 10,
               callback: function (value, index, values) {
                 return number_format(value);
               },
+      suggestedMin: 0,
+      suggestedMax:100
             },
             gridLines: {
               color: 'rgb(234, 236, 244)',
@@ -138,6 +255,7 @@
     },
   });
   const body = document.body;
+  
   const toggleButton = document.getElementById('theme-toggle');
   const toggleCircle = document.getElementById('toggle-circle');
   document.addEventListener('DOMContentLoaded', function () {
@@ -160,7 +278,6 @@
       myLineChart.options.scales.xAxes[0].ticks.fontColor = 'black';
       myLineChart.options.scales.yAxes[0].ticks.fontColor = 'black';
       myLineChart.update();
-      console.log('aaaa');
     } else {
       myLineChart.options.scales.xAxes[0].ticks.fontColor = 'white';
       myLineChart.options.scales.yAxes[0].ticks.fontColor = 'white';

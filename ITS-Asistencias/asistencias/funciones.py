@@ -12,6 +12,8 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from openpyxl.worksheet.table import Table, TableStyleInfo
+import calendar
+from datetime import date
 def calcularDiaNombre(dia):
     dias_en_ingles = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     dias_en_espanol = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
@@ -254,9 +256,10 @@ def calcInformeEmpleado(empleado,fechaInicio,fechaFin,margenEntrada):
                     marca.diferenciaFal = diferencia_tiempo
                     retirosFueradeHora.append(marca)
     return llegadasTarde , retirosFueradeHora
-def calcStats():
-    date_max = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha']
-    date_min = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha']
+def calcStats(date_min,date_max):
+    if date_min is None or date_max is None:
+        date_max = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha']
+        date_min = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha']
     margenEntrada = time(0,1,0)
     total_retrasos = 0
     total_salidas_tempranas = 0
@@ -321,3 +324,54 @@ def generarInforme(form):
         empleado.llegadasTarde = llegadasTarde
         empleado.retirosFueradeHora = retirosFueradeHora
     return descargarInformeExcel(empleados)
+
+class HistogramaHome():
+    def marcasxmes(self,year):
+        labels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+        data_list = [Marca.objects.filter(fechaHora__month=mes).filter(fechaHora__year=year).count() for mes in range(1, 13)]
+        return labels, data_list
+    def marcasAnio(self):
+        minAnio = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha'].year
+        maxAnio = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha'].year
+        anios = [anio for anio in range(minAnio, maxAnio + 1)]
+        tablaFrecuencias = []
+        for anio in anios:
+            mes, frecuencia = self.marcasxmes(anio)
+            tablaFrecuencias.append({
+                'year': anio,
+                'meses':{
+                    'labels': mes,
+                    'data': frecuencia
+                }
+            })
+        return tablaFrecuencias
+    def faltasAnio(self):
+        minAnio = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha'].year
+        maxAnio = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha'].year
+        anios = [anio for anio in range(minAnio, maxAnio + 1)]
+        tablaFrecuencias = []
+        for anio in anios:
+            mes, frecuenciaRetrasos, frecuenciaRetiros = self.faltasxmes(anio)
+            tablaFrecuencias.append({
+                'year': anio,
+                'meses':{
+                    'labels': mes,
+                    'retrasos': frecuenciaRetrasos,
+                    'retirosAnticipadas': frecuenciaRetiros
+                }
+            })
+        return tablaFrecuencias
+    def faltasxmes(self,year):
+        labels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+        retrasosList = []
+        retirosList = []
+        for mes in range(1, 13):
+            primer_dia = date(year, mes, 1)
+            ultimo_dia = date(year, mes, calendar.monthrange(year, mes)[1])
+            retrasos, retiros = calcStats(primer_dia,ultimo_dia)
+            retrasosList.append(retrasos)
+            retirosList.append(retiros)
+
+        return labels, retrasosList, retirosList
+
+
