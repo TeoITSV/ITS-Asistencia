@@ -324,7 +324,37 @@ def generarInforme(form):
         empleado.llegadasTarde = llegadasTarde
         empleado.retirosFueradeHora = retirosFueradeHora
     return descargarInformeExcel(empleados)
-
+class PieChartHome():
+    def calcStats(self):
+        minAnio = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha'].year
+        maxAnio = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha'].year
+        anios = [anio for anio in range(minAnio, maxAnio + 1)]
+        stats = []
+        labels = ["En horario", "Anticipados", "Retrasos"]
+        for anio in anios:
+            cantidad = self.calcAnio(anio)
+            stats.append({
+                'year': anio,
+                'total': sum(cantidad),
+                'data':{
+                    'labels': labels,
+                    'data': cantidad
+                }
+            })
+        return stats
+    def calcAnio(self,year):
+        date_min = date(year, 1, 1)
+        date_max = date(year, 12, 31)
+        margenEntrada = time(0,1,0)
+        total_retrasos = 0
+        total_salidas_tempranas = 0
+        total_marcas = Marca.objects.filter(fechaHora__range=[date_min, date_max]).count()
+        for empleado in Empleado.objects.all():
+            retrasos_empleado,empleado_salidas_tempranas = calcInformeEmpleado(empleado,date_min,date_max,margenEntrada)
+            total_retrasos+=len(retrasos_empleado)
+            total_salidas_tempranas+=len(empleado_salidas_tempranas)
+        totalEnHorario = total_marcas - total_retrasos - total_salidas_tempranas
+        return [totalEnHorario, total_salidas_tempranas, total_retrasos]
 class HistogramaHome():
     def marcasxmes(self,year):
         labels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']

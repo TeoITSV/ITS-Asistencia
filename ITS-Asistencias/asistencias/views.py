@@ -13,12 +13,15 @@ def home_view(request):
     marcasxanio = histograma.marcasAnio()
     faltasxanio = histograma.faltasAnio()
 
+    pieChart = PieChartHome()
+    dataPieChart = pieChart.calcStats()
     return render(request, 'stats.html',{'total_empleados': Empleado.objects.count(),
                                           'total_marcas': Marca.objects.count(),
                                           'total_retrasos': total_retrasos,
                                         'total_salidas_anticipadas': total_salidas_tempranas,
                                         'marcasxanio': marcasxanio,
                                         'faltasxanio': faltasxanio,
+                                        'dataPieChart': dataPieChart
                                         })
 
 def form_view(request):

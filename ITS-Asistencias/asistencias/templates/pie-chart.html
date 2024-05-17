@@ -3,30 +3,30 @@
     <div
       class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
     >
-      <h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
+      <h6 class="m-0 font-weight-bold text-primary">Incumplimientos de</h6>
       <div class="d-flex align-items-center">
-        <button class="btn btn-transparent btn-circle mr-2" id="prevChart">
+        <button class="btn btn-transparent btn-circle mr-2" id="prevPieChart">
           <i class="bi bi-chevron-compact-left"></i>
         </button>
-        <span class="mx-2" id="selectedChart">2024</span>
-        <button class="btn btn-transparent btn-circle ml-2" id="nextChart">
+        <span class="mx-2" id="selectedPieChart">2024</span>
+        <button class="btn btn-transparent btn-circle ml-2" id="nextPieChart">
           <i class="bi bi-chevron-compact-right"></i>
         </button>
       </div>
     </div>
     <div class="card-body">
       <div class="chart-pie pt-4 pb-2">
-        <canvas id="myPieChart"></canvas>
+        <canvas id="chartTortaPercentages"></canvas>
       </div>
-      <div class="mt-4 text-center small">
-        <span class="mr-2">
-          <i class="fas fa-circle text-primary"></i> Direct
+      <div class="mt-4 text-center small" id="labelsChart">
+        <span class="mr-1">
+          <i class="fas fa-circle text-primary"></i> En horario
         </span>
-        <span class="mr-2">
-          <i class="fas fa-circle text-success"></i> Social
+        <span class="mr-1">
+          <i class="fas fa-circle text-warning"></i> Anticipados
         </span>
-        <span class="mr-2">
-          <i class="fas fa-circle text-info"></i> Referral
+        <span class="mr-">
+          <i class="fas fa-circle text-danger"></i> Retrasos
         </span>
       </div>
     </div>
@@ -48,3 +48,95 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   }
 </style>
+<script>
+  var ctxPie = document.getElementById('chartTortaPercentages');
+  var tortaChart = new Chart(ctxPie, {
+  type: 'doughnut',
+  data: {
+    labels: ["En horario", "Anticipados", "Retrasos"],
+    datasets: [{
+      data: [10,10,10],
+      backgroundColor: ['#4e73df', '#f6c23e', '#e74a3b'],
+      hoverBackgroundColor: ['#4e73df', '#cca000', '#b0262a'],
+      hoverBorderColor: "rgba(234, 236, 244, 1)",
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    tooltips: {
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: true,
+      caretPadding: 10,
+      callbacks: {
+        label: function(tooltipItem, data) {
+          var label = data.labels[tooltipItem.index] || '';
+
+          if (label) {
+            label += ': ';
+          }
+          label += data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+          totalData = data.datasets[tooltipItem.datasetIndex].data.reduce((a,b)=>a+b,0);
+          // Agrega el total
+          label += ' (Total: ' + totalData + ')';
+
+          return label;
+        }
+      }
+    },
+    legend: {
+      display: false
+    },
+    cutoutPercentage: 80,
+  }
+});
+  $(document).ready(function () {
+    var dataChart = {{ dataPieChart|safe }};
+    console.log(dataChart);
+    var currentYearPie = new Date().getFullYear();
+    var selectedPieChart = document.getElementById('selectedPieChart');
+    selectedPieChart.innerHTML = currentYearPie;
+    dataChart.forEach(function(item){
+      item.year = parseInt(item.year)
+    })
+    actualizarPieChart(currentYearPie);
+    
+
+  function actualizarPieChart(year){
+    $('#selectedPieChart').html(year);
+
+    var statsParaAnioActual = dataChart.find((element)=>element.year == currentYearPie);
+    if (statsParaAnioActual == undefined){
+      // Si no hay datos, crea el gráfico sin colores
+      tortaChart.data.labels = ["Sin datos"];
+      $('#labelsChart').html('<span class="text-muted">No hay datos este año</span>');
+      tortaChart.data.datasets[0].data = [1];
+      tortaChart.data.datasets[0].backgroundColor = ['#6c757d'];
+      tortaChart.data.datasets[0].hoverBackgroundColor = ['#343a40'];
+    }else{
+      $('#labelsChart').html('<span class="mr-1"><i class="fas fa-circle text-primary"></i> En horario</span><span class="mr-1"><i class="fas fa-circle text-warning"></i> Anticipados</span><span class="mr-"><i class="fas fa-circle text-danger"></i> Retrasos</span>');
+      tortaChart.data.labels = statsParaAnioActual.data.labels;
+      tortaChart.data.datasets[0].data = statsParaAnioActual.data.data;
+      tortaChart.data.datasets[0].backgroundColor = ['#4e73df', '#f6c23e', '#e74a3b'];
+      tortaChart.data.datasets[0].hoverBackgroundColor = ['#375aa0', '#cca000', '#b0262a'];
+    }
+    tortaChart.update();
+}
+$('#prevPieChart').click(function () {
+    currentYearPie--;
+      actualizarPieChart(currentYearPie);
+    });
+  $('#nextPieChart').click(function () {
+    currentYearPie++;
+    actualizarPieChart(currentYearPie);
+  });
+
+})
+  
+
+  
+  </script>
