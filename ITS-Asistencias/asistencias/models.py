@@ -49,7 +49,7 @@ class Empleado(Base):
         draw = ImageDraw.Draw(image)
 
         # Ruta a la fuente
-        font_path = os.path.join(settings.BASE_DIR, 'fonts', 'PoetsenOne-Regular.ttf')
+        font_path = os.path.join(settings.BASE_DIR, 'static/fonts', 'PoetsenOne-Regular.ttf')
 
         # Cargar fuente
         try:

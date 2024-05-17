@@ -13,6 +13,8 @@ WORKDIR /ITS-Asistencias/ITS-Asistencias
 
 RUN apt-get update && apt-get install -y supervisor
 
+RUN mkdir -p media/
+RUN chmod -R 755 media/
 # Copia la configuración de Nginx al contenedor
 
 COPY supervisord.conf /supervisord.conf

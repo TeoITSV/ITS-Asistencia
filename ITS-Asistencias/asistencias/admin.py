@@ -1,8 +1,11 @@
 from django.contrib import admin
 from .models import Empleado, Horario, DiaHorario, Dia, TipoMarca, Marca
-
+from django.utils.html import format_html
 class EmpleadoAdmin(admin.ModelAdmin):
-    list_display = ('idEmpleado', 'nombreCompleto', 'estaActivo');
+    def foto_perfil(self, obj):
+        return format_html('<img src="{}" style="max-width:25px; max-height:25px;"/>'.format(obj.profile_picture.url))
+    foto_perfil.short_description = 'Foto de Perfil'
+    list_display = ('idEmpleado', 'foto_perfil', 'nombreCompleto', 'estaActivo');
     search_fields = ('idEmpleado', 'nombreCompleto');
     list_filter = ('estaActivo',);
 
