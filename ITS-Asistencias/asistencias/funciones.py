@@ -13,25 +13,58 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from openpyxl.worksheet.table import Table, TableStyleInfo
 import calendar
+from django.core.exceptions import ObjectDoesNotExist
 from datetime import date
+import re
+def limpiar_nombre(nombre):
+    # Convertir a minúsculas y eliminar espacios en blanco adicionales
+    nombre = nombre.lower().strip()
+    # Eliminar caracteres especiales y números
+    nombre = re.sub(r'[^a-zA-Z\s]', '', nombre)
+    return nombre
 def calcularDiaNombre(dia):
-    dias_en_ingles = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    dias_en_espanol = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+    # recibe la fecha de la marca y obtiene que dia de la semana es, formateada para aceptar los dias que trabaja la bd, 
+    # solo trabajamos de lunes  a viernes
+    # dias_en_ingles = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    
+    dias_en_espanol = Dia.objects.values_list('nombre', flat=True)
+    traduccion_dias = {
+    "Lunes": "Monday",
+    "Martes": "Tuesday",
+    "Miércoles": "Wednesday",
+    "Jueves": "Thursday",
+    "Viernes": "Friday",
+    "Sábado": "Saturday",
+    "Domingo": "Sunday",
+    }
+    dias_en_ingles = [traduccion_dias[dia] for dia in dias_en_espanol]
+
     diaNombre = dia.strftime("%A").capitalize()
     if diaNombre in dias_en_ingles:
         indice = dias_en_ingles.index(diaNombre)
         return dias_en_espanol[indice]
-    else:
+    elif diaNombre in dias_en_espanol:
         return diaNombre
+    else:
+        return None
 
 def crearEmpleadoFila(row):
-    empleado_nombre = row['Nombre']
+    empleado_nombre = limpiar_nombre(row['Nombre'])
+    print(empleado_nombre)
     empleado_id = row['ID de usuario']
-    if empleado_nombre is not None and empleado_id is not None and empleado_nombre != 'vacio' and empleado_id != 'vacio':
-        empleado, created = Empleado.objects.get_or_create(nombreCompleto=empleado_nombre, idEmpleado=empleado_id )
-        if created:
-            empleado.save()
-        return empleado
+    print(f'Empleado: {empleado_nombre} - ID: {empleado_id}')
+
+    if empleado_nombre and empleado_id and empleado_nombre != 'vacio' and empleado_id != 'vacio' or empleado_nombre=='':
+        try:
+            empleado, created = Empleado.objects.get_or_create(
+                idEmpleado=empleado_id,
+                defaults={'nombreCompleto': empleado_nombre}
+            )
+            print(empleado)
+            return empleado
+        except Exception as e:
+            print(f'Error al crear o obtener el empleado: {e}')
+            return None
     return None
 def crearHorario(empleado):
     horariosViejos = Horario.objects.filter(empleado=empleado,esActual=True)
@@ -56,7 +89,6 @@ def crearDiaHorario(horario,dia,valor_in,valor_out):
              
 def crearHorarioFila(row,horarios_df, empleado):
     horario = crearHorario(empleado)
-
     for dia in Dia.objects.all():
         columna_in = dia.nombre
         valor_columna_in = row[dia.nombre]
@@ -106,51 +138,62 @@ def parseMarcas(df):
     return marcasEmpleadoPorDia
 def crearMarcaEmpleado(empleado, dicMarcas):
     marcasCreadas = []
+    try:
     # Se busca el horario actual del empleado
-    horario_actual = Horario.objects.filter(empleado=empleado,esActual=True).latest('fechaCreacion')
-    for dia, marcas in dicMarcas['marcas'].items():
-        fecha_dt = datetime.strptime(dia, "%m/%d/%y")
-        nombre_dia_semana = calcularDiaNombre(fecha_dt)
-
-        # Se busca el día y horario correspondiente
-        dia_horario_actual = DiaHorario.objects.filter(horario=horario_actual, diaNombre__nombre=nombre_dia_semana).first()
-        #print(f'Empleado: {empleado.nombreCompleto} - ID: {empleado.idEmpleado} - Dia: {dia}-{nombre_dia_semana} - Dia Horario: {dia_horario_actual}')
-        # Convierte las marcas a objetos datetime
-        marcas_dt = [datetime.strptime(marca, '%Y-%m-%d %H:%M:%S') for marca in marcas]
-        # Obtén la hora de entrada y salida del horario actual
-        #print(f'fecha_dt: {fecha_dt} - dia_horario_actual: {dia_horario_actual.horaEntrada}')
-        if dia_horario_actual.horaEntrada is not None and dia_horario_actual.horaSalida is not None:
-            hora_entrada_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaEntrada)
-            hora_salida_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaSalida)
-            marcaMax = max(marcas_dt)
-            marcaMin = min(marcas_dt)
-            tipoEntrada = None
-            igual = False
-            if marcaMax == marcaMin or len(marcas_dt) == 1:
-                igual = True
-                diferenciaHorarioIn = hora_entrada_horario - marcaMax
-                diferenciaHorarioOut = hora_salida_horario - marcaMax
-                if diferenciaHorarioIn < diferenciaHorarioOut:
-                    tipoEntrada = 'In'
-                elif diferenciaHorarioIn > diferenciaHorarioOut:
-                    tipoEntrada = 'Out'
-                else:
-                    tipoEntrada = None
-                marca,created = crearMarca(dia_horario_actual,empleado, marcaMax, tipoEntrada)
-                if created == True:
-                        marcasCreadas.append(marca)
-            else:
-                marca1, created1 = crearMarca(dia_horario_actual,empleado, marcaMin, 'In')
-                marca2, created2 = crearMarca(dia_horario_actual,empleado, marcaMax, 'Out')
-                if created1 == True and created2 == True:
-                    marcasCreadas.append(marca1)
-                    marcasCreadas.append(marca2)
-            for marca in marcas_dt:
-                if marca!= marcaMax and marca!= marcaMin and igual != True:
-                    marca, created = crearMarca(dia_horario_actual,empleado, marca, None)
+        print(f'Empleado: {empleado.nombreCompleto} - ID: {empleado.idEmpleado}')
+        horario_actual = Horario.objects.filter(empleado=empleado,esActual=True).latest('fechaCreacion')
+        print(f'Empleado: {empleado.nombreCompleto} - ID: {empleado.idEmpleado} - Horario: {horario_actual}')
+        for dia, marcas in dicMarcas['marcas'].items():
+            fecha_dt = datetime.strptime(dia, "%m/%d/%y")
+            nombre_dia_semana = calcularDiaNombre(fecha_dt)
+            if nombre_dia_semana is None:
+                crearMarca(None,empleado,fecha_dt, None)
+                continue
+            # Se busca el día y horario correspondiente
+            dia_horario_actual = DiaHorario.objects.filter(horario=horario_actual, diaNombre__nombre=nombre_dia_semana).first()
+            print(f'Empleado: {empleado.nombreCompleto} - ID: {empleado.idEmpleado} - Dia: {dia}-{nombre_dia_semana} - Dia Horario: {dia_horario_actual}')
+            # Convierte las marcas a objetos datetime
+            marcas_dt = [datetime.strptime(marca, '%Y-%m-%d %H:%M:%S') for marca in marcas]
+            # Obtén la hora de entrada y salida del horario actual
+            #print(f'fecha_dt: {fecha_dt} - dia_horario_actual: {dia_horario_actual.horaEntrada}')
+            if dia_horario_actual.horaEntrada is not None and dia_horario_actual.horaSalida is not None:
+                hora_entrada_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaEntrada)
+                hora_salida_horario = datetime.combine(fecha_dt.date(), dia_horario_actual.horaSalida)
+                marcaMax = max(marcas_dt)
+                marcaMin = min(marcas_dt)
+                tipoEntrada = None
+                igual = False
+                if marcaMax == marcaMin or len(marcas_dt) == 1:
+                    igual = True
+                    diferenciaHorarioIn = hora_entrada_horario - marcaMax
+                    diferenciaHorarioOut = hora_salida_horario - marcaMax
+                    if diferenciaHorarioIn < diferenciaHorarioOut:
+                        tipoEntrada = 'In'
+                    elif diferenciaHorarioIn > diferenciaHorarioOut:
+                        tipoEntrada = 'Out'
+                    else:
+                        tipoEntrada = None
+                    marca,created = crearMarca(dia_horario_actual,empleado, marcaMax, tipoEntrada)
                     if created == True:
-                        marcasCreadas.append(marca)
-    return marcasCreadas
+                            marcasCreadas.append(marca)
+                else:
+                    marca1, created1 = crearMarca(dia_horario_actual,empleado, marcaMin, 'In')
+                    marca2, created2 = crearMarca(dia_horario_actual,empleado, marcaMax, 'Out')
+                    if created1 == True and created2 == True:
+                        marcasCreadas.append(marca1)
+                        marcasCreadas.append(marca2)
+                for marca in marcas_dt:
+                    if marca!= marcaMax and marca!= marcaMin and igual != True:
+                        marca, created = crearMarca(dia_horario_actual,empleado, marca, None)
+                        if created == True:
+                            marcasCreadas.append(marca)
+        return marcasCreadas
+    except ObjectDoesNotExist:
+        print(f'el empleado {empleado} no tiene horario cargado')
+        return []
+    except Exception as e:
+        raise Exception(f'Error al crear las marcas de {empleado}: {e}')
+    
 def validarHorario(row, empleado, horarios_df):
     # implementar logica en un futuro para evitar entradas duplicadas el mismo dia
     horarios = Horario.objects.filter(empleado=empleado,esActual=True)
@@ -199,7 +242,7 @@ def leerPlanillaHorarios(horarioExcel):
         if len(empleados) > 0:
             return True, f"Se cargaron los horarios nuevos para los empleados: {', '.join(empleados)}"
         else:
-            return True, f'Se cargo la planilla exitosamente pero no hubo cambios con los horarios viejos.'
+            return True, f'Se cargo la planilla exitosamente pero no hubo cambios con los horarios viejos'
     except FileNotFoundError:
         return False, 'No se selecciono ningun archivo de horarios.'
     except Exception as e:
@@ -270,6 +313,18 @@ def calcStats(date_min,date_max):
         total_salidas_tempranas+=len(empleado_salidas_tempranas)
     return total_retrasos, total_salidas_tempranas
 
+def ajustar_ancho_columnas(hoja):
+    for col in hoja.columns:
+        max_length = 0
+        column = col[0].column_letter  # Obtiene la letra de la columna (A, B, C, etc.)
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        hoja.column_dimensions[column].width = adjusted_width
 
 def descargarInformeExcel(empleados):
     # Crear un nuevo libro de trabajo
@@ -297,7 +352,7 @@ def descargarInformeExcel(empleados):
 
     # Aplicar autofiltros
     sheet.auto_filter.ref = sheet.dimensions
-
+    ajustar_ancho_columnas(sheet)
     # Crear una respuesta HTTP con el archivo Excel
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = archivo
@@ -326,8 +381,17 @@ def generarInforme(form):
     return descargarInformeExcel(empleados)
 class PieChartHome():
     def calcStats(self):
-        minAnio = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha'].year
-        maxAnio = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha'].year
+        min_fecha = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha']
+        max_fecha = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha']
+        if min_fecha is not None:
+            minAnio = min_fecha.year
+        else:
+            return []
+
+        if max_fecha is not None:
+            maxAnio = max_fecha.year
+        else:
+            return []
         anios = [anio for anio in range(minAnio, maxAnio + 1)]
         stats = []
         labels = ["En horario", "Anticipados", "Retrasos"]
@@ -361,8 +425,17 @@ class HistogramaHome():
         data_list = [Marca.objects.filter(fechaHora__month=mes).filter(fechaHora__year=year).count() for mes in range(1, 13)]
         return labels, data_list
     def marcasAnio(self):
-        minAnio = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha'].year
-        maxAnio = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha'].year
+        min_fecha = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha']
+        max_fecha = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha']
+        if min_fecha is not None:
+            minAnio = min_fecha.year
+        else:
+            minAnio = 2023
+
+        if max_fecha is not None:
+            maxAnio = max_fecha.year
+        else:
+            maxAnio = date.today().year
         anios = [anio for anio in range(minAnio, maxAnio + 1)]
         tablaFrecuencias = []
         for anio in anios:
@@ -376,8 +449,17 @@ class HistogramaHome():
             })
         return tablaFrecuencias
     def faltasAnio(self):
-        minAnio = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha'].year
-        maxAnio = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha'].year
+        min_fecha = Marca.objects.aggregate(min_fecha=Min('fechaHora'))['min_fecha']
+        max_fecha = Marca.objects.aggregate(max_fecha=Max('fechaHora'))['max_fecha']
+        if min_fecha is not None:
+            minAnio = min_fecha.year
+        else:
+            minAnio = 2023
+
+        if max_fecha is not None:
+            maxAnio = max_fecha.year
+        else:
+            maxAnio = date.today().year
         anios = [anio for anio in range(minAnio, maxAnio + 1)]
         tablaFrecuencias = []
         for anio in anios:

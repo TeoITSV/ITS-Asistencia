@@ -3,10 +3,14 @@ from asistencias.forms import UploadForm, InformeForm
 from asistencias.funciones import *
 import locale
 import pandas as pd
+from django.views.decorators.cache import cache_page
 import json 
+from django.http import JsonResponse, StreamingHttpResponse
 # Create your views here.
 
 
+
+@cache_page(60 * 15)  # Cachear durante 15 minutos
 def home_view(request):
     total_retrasos, total_salidas_tempranas = calcStats(None, None)
     histograma = HistogramaHome()
@@ -30,7 +34,6 @@ def form_view(request):
 def upload_files(request):
     if request.method == 'POST':
         form = UploadForm(request.POST, request.FILES)
-
         if form.is_valid():
             horarios_file = form.cleaned_data['horarios_file']
             marcas_file = form.cleaned_data['marcas_file']
@@ -38,8 +41,12 @@ def upload_files(request):
                 successHorarios, messageHorarios = leerPlanillaHorarios(horarios_file)
             else:
                 successHorarios = True
-                messageHorarios = f'No se modifico ningun Horario. \n'
-            successMarcas, messageMarcas = leerPlanillaMarcas(marcas_file)
+                messageHorarios = f'No se modifico ningun Horario\n'
+            if marcas_file:
+                successMarcas, messageMarcas = leerPlanillaMarcas(marcas_file)
+            else:
+                successMarcas = True
+                messageMarcas = f'No se agrego ninguna Marca. \n'
             if successHorarios == True and successMarcas == True:
                 success_flag = True
             else:

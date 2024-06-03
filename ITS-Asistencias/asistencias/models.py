@@ -19,10 +19,11 @@ class Empleado(Base):
     nombreCompleto = models.CharField(max_length=100)
     estaActivo = models.BooleanField(default=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
-
+    def getNombre(self):
+        '''Capitaliza las primeras letras del nombre y apellido'''
+        return string.capwords(self.nombreCompleto)
     def __str__(self):
-        return self.nombreCompleto
-
+        return f'{self.getNombre()}'
     def save(self, *args, **kwargs):
         if not self.profile_picture:
             self.profile_picture = self.generate_profile_picture()

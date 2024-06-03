@@ -12,7 +12,7 @@ class UploadForm(forms.Form):
     marcas_file = forms.FileField(
         label='Archivo de Marcas de Dedo (xlsx)',
         widget=forms.ClearableFileInput(attrs={'style': 'opacity: 0; position: absolute; z-index: -1;', 'id': 'marcas_file_input'}),
-        required=True
+        required=False
     )
 
 class InformeForm(forms.Form):

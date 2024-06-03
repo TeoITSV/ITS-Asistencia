@@ -103,6 +103,10 @@
     dataChart.forEach(function(item){
       item.year = parseInt(item.year)
     })
+    var dataParaAnioActual = dataChart.find((element)=>element.year == currentYearPie);
+    if (dataParaAnioActual == undefined || dataParaAnioActual.data.data.length == 0){
+      currentYearPie = dataChart[0].year;
+      console.log(currentYearPie);}
     actualizarPieChart(currentYearPie);
     
 
@@ -110,7 +114,7 @@
     $('#selectedPieChart').html(year);
 
     var statsParaAnioActual = dataChart.find((element)=>element.year == currentYearPie);
-    if (statsParaAnioActual == undefined){
+    if (statsParaAnioActual == undefined || statsParaAnioActual.data.data.length == 0){
       // Si no hay datos, crea el gráfico sin colores
       tortaChart.data.labels = ["Sin datos"];
       $('#labelsChart').html('<span class="text-muted">No hay datos este año</span>');
