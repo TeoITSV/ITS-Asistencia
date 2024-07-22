@@ -240,7 +240,7 @@ def leerPlanillaHorarios(horarioExcel):
             if validarHorario(row, empleado, horarios_df):
                 crearHorarioFila(row, horarios_df, empleado)
                 empleados.append(empleado.nombreCompleto)
-                yield True, f'Processed horario for {empleado.nombreCompleto}'
+                yield True, f'Procesando horario para {empleado.nombreCompleto.title()}'
         if len(empleados) > 0:
             yield True, f"Se cargaron los horarios nuevos para los empleados: {', '.join(empleados)}"
         else:
@@ -257,7 +257,7 @@ def leerPlanillaMarcas(marcasExcel):
         for x in marcasEmpleadoPorDia:
             empleado = crearEmpleadoFila(x)
             marcasCreadas += crearMarcaEmpleado(empleado, x)
-            yield True, f'Processed marca for {empleado}'
+            yield True, f'Procesando marcas para {empleado.nombreCompleto.title()}'
         yield True, f'Se cargaron {len(marcasCreadas)} marcas'
     except FileNotFoundError:
         yield False, 'No se selecciono ningun archivo de marcas.'

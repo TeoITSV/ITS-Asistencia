@@ -106,71 +106,57 @@
             $('#marcas_file_label').text(filename);
         });
 
-        // Evento de envío del formulario con AJAX
         $('#uploadForm').on('submit', function(event) {
-            event.preventDefault();
-            mostrarOverlay(); // Mostrar el overlay al enviar el formulario
-            $('#overlayMessage').text(''); // Limpiar el mensaje del overlay
+        event.preventDefault();
+        $('#overlayMessage').text('');
+        mostrarOverlay();
 
-            var formData = new FormData(this);
+        var formData = new FormData(this);
 
-            $.ajax({
-                url: '{% url "upload_files" %}',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                xhr: function() {
-                    var xhr = new window.XMLHttpRequest();
-                    
-                    xhr.onreadystatechange = function() {
-                        if (xhr.readyState === XMLHttpRequest.LOADING) { // Mientras se está cargando
+        $.ajax({
+            url: '{% url "upload_files" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            xhr: function() {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === XMLHttpRequest.LOADING) { // Mientras se está cargando
                             console.log('XHR response received:', xhr.responseText);
                             // Dividir la respuesta en líneas y tomar la última
                             var lines = xhr.responseText.trim().split('\n');
                             $('#overlayMessage').text(lines[lines.length - 1]);
                         }
-                    };
-
-                    xhr.onload = function() {
-                        ocultarOverlay(); // Ocultar el overlay
-                        console.log('XHR status:', xhr.status);
-                        console.log('XHR response text:', xhr.responseText);
-                        var lines = xhr.responseText.trim().split('\n');
-                        var lastLine = lines[lines.length - 1];
-                        $('#overlayMessage').text(lastLine);
-
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        ocultarOverlay();
                         if (xhr.status >= 200 && xhr.status < 300) {
-                            if (lastLine.includes('All tasks completed successfully')) {
-                                $('#successModal').modal('show'); // Mostrar el modal de éxito
+                            var lines = xhr.responseText.trim().split('\n');
+                            var lastLine = lines[lines.length - 1];
+                            $('#overlayMessage').text(lastLine);
+                            if (lastLine.includes('Error')) {
+                                $('#errorMessage').text(lastLine);
+                                $('#errorModal').modal('show');
                             } else {
-                                $('#errorModal').modal('show'); // Mostrar el modal de error
+                                $('#successMessage').text(lines[lines.length - 1]);
+                                $('#successModal').modal('show');
+                                
                             }
                         } else {
-                            $('#errorModal').modal('show'); // Mostrar el modal de error si la respuesta es un error
+                            $('#errorModal').modal('show');
                         }
-                    };
+                    }
+                };
 
-                    xhr.onerror = function() {
-                        ocultarOverlay(); // Ocultar el overlay en caso de error
-                        $('#responseMessage').text('An error occurred.');
-                        $('#errorModal').modal('show'); // Mostrar el modal de error
-                    };
+                xhr.onerror = function() {
+                    ocultarOverlay();
+                    $('#errorModal').modal('show');
+                };
 
-                    return xhr;
-                },
-                success: function(response) {
-                    console.log('AJAX success response:', response);
-                },
-                error: function(xhr, status, error) {
-                    ocultarOverlay(); // Ocultar el overlay en caso de error
-                    console.log('AJAX error status:', status);
-                    console.log('AJAX error response:', xhr.responseText);
-                    $('#responseMessage').text('An error occurred: ' + error);
-                    $('#errorModal').modal('show'); // Mostrar el modal de error
-                }
-            });
+                return xhr;
+            }
         });
+    });
     });
 </script>
 {% endblock %}

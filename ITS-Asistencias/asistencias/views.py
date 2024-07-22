@@ -33,44 +33,47 @@ def form_view(request):
     return render(request, 'form.html')
 
 
+
 def upload_files(request):
     if request.method == 'POST':
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             horarios_file = form.cleaned_data['horarios_file']
             marcas_file = form.cleaned_data['marcas_file']
-
             def event_stream():
+                horariosCargados = ''
+                marcasCargadas = ''
                 success_flag = True
                 try:
                     if horarios_file:
-                        yield 'Starting to read schedules...\n'
+                        yield 'Iniciando la lectura de horarios...\n'
                         for success, message in leerPlanillaHorarios(horarios_file):
                             yield message + '\n'
                             if not success:
                                 success_flag = False
                                 return
-                        yield 'Finished reading schedules.\n'
+                        horariosCargados = message
+                        yield 'Terminada la lectura de horarios.\n'
                     else:
-                        yield 'No se modifico ningun Horario\n'
+                        yield 'No se modificó ningún horario.\n'
                     
                     if marcas_file:
-                        yield 'Starting to read marcas...\n'
-                        for success, message in leerPlanillaMarcas(marcas_file):
-                            yield message + '\n'
+                        yield 'Iniciando la lectura de marcas...\n'
+                        for success, messageMarcas in leerPlanillaMarcas(marcas_file):
+                            yield messageMarcas + '\n'
                             if not success:
                                 success_flag = False
                                 return
-                        yield 'Finished reading marcas.\n'
+                        marcasCargadas = messageMarcas
+                        yield 'Terminada la lectura de marcas.\n'
                     else:
-                        yield 'No se agrego ninguna Marca.\n'
+                        yield 'No se agregó ninguna marca.\n'
 
-                    if success_flag:
-                        yield 'All tasks completed successfully.\n'
-                    else:
-                        yield 'Some tasks failed.\n'
                 except Exception as e:
-                    yield f'An error occurred: {str(e)}\n'
+                    yield f'Ocurrió un error: {str(e)}\n'
+                if success_flag:
+                        mensajeExito = f' {horariosCargados} \n {marcasCargadas}'
+                        yield f'Todas las tareas se completaron con éxito. \n {mensajeExito}'
 
             response = StreamingHttpResponse(event_stream(), content_type='text/plain')
             response['Cache-Control'] = 'no-cache'
