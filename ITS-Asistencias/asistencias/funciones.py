@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta,time
+import time
 import json
 import locale
 import openpyxl
@@ -236,32 +237,32 @@ def leerPlanillaHorarios(horarioExcel):
         empleados = []
         for index, row in horarios_df.iloc[1:].iterrows():
             empleado = crearEmpleadoFila(row)
-            if validarHorario(row, empleado,horarios_df) ==True:
-                crearHorarioFila(row,horarios_df,empleado)
+            if validarHorario(row, empleado, horarios_df):
+                crearHorarioFila(row, horarios_df, empleado)
                 empleados.append(empleado.nombreCompleto)
+                yield True, f'Processed horario for {empleado.nombreCompleto}'
         if len(empleados) > 0:
-            return True, f"Se cargaron los horarios nuevos para los empleados: {', '.join(empleados)}"
+            yield True, f"Se cargaron los horarios nuevos para los empleados: {', '.join(empleados)}"
         else:
-            return True, f'Se cargo la planilla exitosamente pero no hubo cambios con los horarios viejos'
+            yield True, 'Se cargo la planilla exitosamente pero no hubo cambios con los horarios viejos'
     except FileNotFoundError:
-        return False, 'No se selecciono ningun archivo de horarios.'
+        yield False, 'No se selecciono ningun archivo de horarios.'
     except Exception as e:
-        return False, (f"Se produjo un error al leer el archivo Excel: {e}")
+        yield False, f"Se produjo un error al leer el archivo Excel: {e}"
 def leerPlanillaMarcas(marcasExcel):
     try:
-        # Lee el archivo Excel
         marcasCreadas = []
         df = pd.read_excel(marcasExcel)
         marcasEmpleadoPorDia = parseMarcas(df)
         for x in marcasEmpleadoPorDia:
             empleado = crearEmpleadoFila(x)
-            marcasCreadas += crearMarcaEmpleado(empleado,x)
-        # Convierte el diccionario a una lista de diccionarios
-        return True, f'Se cargaron {len(marcasCreadas)} marcas'
+            marcasCreadas += crearMarcaEmpleado(empleado, x)
+            yield True, f'Processed marca for {empleado}'
+        yield True, f'Se cargaron {len(marcasCreadas)} marcas'
     except FileNotFoundError:
-        return False, 'No se selecciono ningun archivo de marcas.'
+        yield False, 'No se selecciono ningun archivo de marcas.'
     except Exception as e:
-        return False, (f"Se produjo un error al leer el archivo Excel: {e}")
+        yield False, f'Se produjo un error al leer el archivo Excel: {e}'
 def calcInformeEmpleado(empleado,fechaInicio,fechaFin,margenEntrada):
     marcas = Marca.objects.filter(empleado=empleado,fechaHora__range=[fechaInicio, fechaFin]).order_by('fechaHora')
     llegadasTarde = []

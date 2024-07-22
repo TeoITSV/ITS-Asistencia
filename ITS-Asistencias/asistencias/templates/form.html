@@ -2,10 +2,12 @@
 
 {% block content %}
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 <div class="container mt-5">
     <h2 class="mb-4">Formulario de Carga de Archivos</h2>
 
-    <form method="post" enctype="multipart/form-data"  id="uploadForm">
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
         {% csrf_token %}
         <div class="form-group">
             <label for="id_horarios_file">Archivo de Horarios (xlsx)</label>
@@ -25,7 +27,8 @@
                 </div>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary ">Enviar</button>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+        <h1 id="responseMessage"></h1>
     </form>
 </div>
 
@@ -39,8 +42,8 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                {{message}}
+            <div class="modal-body" id="successMessage">
+                <!-- Mensaje de éxito será insertado aquí -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -48,6 +51,7 @@
         </div>
     </div>
 </div>
+
 <!-- Modal de error -->
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -58,8 +62,8 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                {{message}}
+            <div class="modal-body" id="errorMessage">
+                <!-- Mensaje de error será insertado aquí -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -67,237 +71,106 @@
         </div>
     </div>
 </div>
-<div id="overlay" class="overlay">
-    <div class="socket">
-        <div class="gel center-gel">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
+
+<div id="overlay" class="overlay" style="display: none;">
+    <div class="overlay-content">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
         </div>
-        <div class="gel c1 r1">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
+        <div id="overlayMessage" class="overlay-message">
+            <!-- Mensaje de la respuesta será insertado aquí -->
         </div>
-        <div class="gel c2 r1">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c3 r1">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c4 r1">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c5 r1">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c6 r1">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        
-        <div class="gel c7 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        
-        <div class="gel c8 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c9 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c10 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c11 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c12 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c13 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c14 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c15 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c16 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c17 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c18 r2">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c19 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c20 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c21 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c22 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c23 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c24 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c25 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c26 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c28 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c29 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c30 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c31 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c32 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c33 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c34 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c35 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c36 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        <div class="gel c37 r3">
-            <div class="hex-brick h1"></div>
-            <div class="hex-brick h2"></div>
-            <div class="hex-brick h3"></div>
-        </div>
-        
     </div>
-  </div>
-{% if success_flag %}
-    <script>
-        $(document).ready(function() {
-            // Mostrar el modal de éxito cuando success_flag está presente
-            $('#successModal').modal('show');
-        });
-    </script>
-{% endif %}
-{% if success_flag == False%}
-    <script>
-        $(document).ready(function() {
-            // Mostrar el modal de éxito cuando success_flag está presente
-            $('#errorModal').modal('show');
-        });
-    </script>
-{% endif %}
+</div>
+
 <script>
-    document.getElementById('horarios_file_input').addEventListener('change', function() {
-        var filename = this.value.split('\\').pop();
-        document.getElementById('horarios_file_label').innerText = filename;
-    });
-
-    document.getElementById('marcas_file_input').addEventListener('change', function() {
-        var filename = this.value.split('\\').pop();
-        document.getElementById('marcas_file_label').innerText = filename;
-    });
+    // Función para mostrar el overlay
     function mostrarOverlay() {
-    document.getElementById('overlay').style.display = 'block';
-  }
+        document.getElementById('overlay').style.display = 'flex'; // Usar flex para centrar el contenido
+    }
 
-  // Función para ocultar el overlay
-  function ocultarOverlay() {
-    document.getElementById('overlay').style.display = 'none';
-  }
+    // Función para ocultar el overlay
+    function ocultarOverlay() {
+        document.getElementById('overlay').style.display = 'none';
+    }
 
-  // Evento de envío del formulario
-  document.getElementById('uploadForm').addEventListener('submit', function () {
-    mostrarOverlay(); // Mostrar el overlay al enviar el formulario
-  });
+    $(document).ready(function() {
+        // Manejadores para mostrar el nombre del archivo seleccionado
+        $('#horarios_file_input').on('change', function() {
+            var filename = this.value.split('\\').pop();
+            $('#horarios_file_label').text(filename);
+        });
 
+        $('#marcas_file_input').on('change', function() {
+            var filename = this.value.split('\\').pop();
+            $('#marcas_file_label').text(filename);
+        });
+
+        // Evento de envío del formulario con AJAX
+        $('#uploadForm').on('submit', function(event) {
+            event.preventDefault();
+            mostrarOverlay(); // Mostrar el overlay al enviar el formulario
+            $('#overlayMessage').text(''); // Limpiar el mensaje del overlay
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '{% url "upload_files" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function() {
+                    var xhr = new window.XMLHttpRequest();
+                    
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === XMLHttpRequest.LOADING) { // Mientras se está cargando
+                            console.log('XHR response received:', xhr.responseText);
+                            // Dividir la respuesta en líneas y tomar la última
+                            var lines = xhr.responseText.trim().split('\n');
+                            $('#overlayMessage').text(lines[lines.length - 1]);
+                        }
+                    };
+
+                    xhr.onload = function() {
+                        ocultarOverlay(); // Ocultar el overlay
+                        console.log('XHR status:', xhr.status);
+                        console.log('XHR response text:', xhr.responseText);
+                        var lines = xhr.responseText.trim().split('\n');
+                        var lastLine = lines[lines.length - 1];
+                        $('#overlayMessage').text(lastLine);
+
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            if (lastLine.includes('All tasks completed successfully')) {
+                                $('#successModal').modal('show'); // Mostrar el modal de éxito
+                            } else {
+                                $('#errorModal').modal('show'); // Mostrar el modal de error
+                            }
+                        } else {
+                            $('#errorModal').modal('show'); // Mostrar el modal de error si la respuesta es un error
+                        }
+                    };
+
+                    xhr.onerror = function() {
+                        ocultarOverlay(); // Ocultar el overlay en caso de error
+                        $('#responseMessage').text('An error occurred.');
+                        $('#errorModal').modal('show'); // Mostrar el modal de error
+                    };
+
+                    return xhr;
+                },
+                success: function(response) {
+                    console.log('AJAX success response:', response);
+                },
+                error: function(xhr, status, error) {
+                    ocultarOverlay(); // Ocultar el overlay en caso de error
+                    console.log('AJAX error status:', status);
+                    console.log('AJAX error response:', xhr.responseText);
+                    $('#responseMessage').text('An error occurred: ' + error);
+                    $('#errorModal').modal('show'); // Mostrar el modal de error
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

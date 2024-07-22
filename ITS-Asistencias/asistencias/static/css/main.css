@@ -236,21 +236,6 @@ table.dataTable.paginate_button:hover {
   color: #ffffff; /* Color de texto del campo de selección de longitud */
 }
 
-.overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.7);
-  z-index: 1000;
-}
-
-.overlay.dark-theme {
-  background: rgba(0, 0, 0, 0.7);
-}
-
 .dark-theme .card {
   color: #000000;
   border-color: #1c1e20;
@@ -284,4 +269,48 @@ table.dataTable.paginate_button:hover {
 }
 .dark-theme .text {
   color: #ffffff;
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Fondo oscuro semi-transparente */
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+.overlay-content {
+  display: flex;
+  flex-direction: column; /* Alinea el spinner y el mensaje verticalmente */
+  align-items: center; /* Centra el contenido horizontalmente */
+  color: white;
+  text-align: center;
+}
+
+.overlay .spinner-border {
+  margin-bottom: 10px; /* Espacio entre el spinner y el mensaje */
+}
+
+.overlay-message {
+  font-size: 1.2em;
+}
+
+/* CSS para el tema oscuro */
+.dark-theme .overlay {
+  background: rgba(
+    0,
+    0,
+    0,
+    0.7
+  ); /* Fondo oscuro más intenso para el tema oscuro */
+}
+
+.dark-theme .overlay-message {
+  color: #ffffff; /* Texto blanco para el tema oscuro */
 }
