@@ -88,7 +88,7 @@
         </div>
     </div>
 </div>
-<div id="overlay" class="overlay">
+<div id="overlayLoadInforme" class="overlay" style="display: none;">
     <div class="socket">
         <div class="gel center-gel">
             <div class="hex-brick h1"></div>
@@ -308,7 +308,7 @@
             });
         });
     });
-    </script>
+</script>
 <script>
     $(document).ready(function() {
         var table;
@@ -383,12 +383,12 @@
         setupDataTable();
     });
     function mostrarOverlay() {
-    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('overlayLoadInforme').style.display = 'block';
   }
 
   // Función para ocultar el overlay
   function ocultarOverlay() {
-    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('overlayLoadInforme').style.display = 'none';
   }
 
   // Evento de envío del formulario

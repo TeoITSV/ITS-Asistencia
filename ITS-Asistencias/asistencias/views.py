@@ -12,7 +12,6 @@ from django.http import JsonResponse, StreamingHttpResponse
 
 #@cache_page(60 * 15)  # Cachear durante 15 minutos
 def home_view(request):
-    print("aaa")
     total_retrasos, total_salidas_tempranas = calcStats(None, None)
     histograma = HistogramaHome()
     marcasxanio = histograma.marcasAnio()
@@ -72,8 +71,8 @@ def upload_files(request):
                 except Exception as e:
                     yield f'Ocurrió un error: {str(e)}\n'
                 if success_flag:
-                        mensajeExito = f' {horariosCargados} \n {marcasCargadas}'
-                        yield f'Todas las tareas se completaron con éxito. \n {mensajeExito}'
+                    mensajeExito = f'Todas las tareas se completaron con éxito.  {horariosCargados}.  {marcasCargadas}'
+                    yield  mensajeExito
 
             response = StreamingHttpResponse(event_stream(), content_type='text/plain')
             response['Cache-Control'] = 'no-cache'
