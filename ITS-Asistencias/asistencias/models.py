@@ -8,12 +8,12 @@ import os
 from django.conf import settings
 # Create your models here.
 class Base(models.Model):
-    fechaCreacion = models.DateTimeField(auto_now_add=True);
-    fechaModificacion = models.DateTimeField(auto_now=True);
+    fechaCreacion = models.DateTimeField(auto_now_add=True)
+    fechaModificacion = models.DateTimeField(auto_now=True)
     class Meta:
-        abstract = True;
+        abstract = True
     def __str__(self):
-        return str(self.id);
+        return str(self.id)
 class Empleado(Base):
     idEmpleado = models.IntegerField(primary_key=True)
     nombreCompleto = models.CharField(max_length=100)
@@ -68,33 +68,49 @@ class Empleado(Base):
 
         return image_content
 class Horario(Base):
-    esActual = models.BooleanField(default=True);
-    empleado = models.ForeignKey('Empleado', on_delete=models.CASCADE);
-    fechaBajada = models.DateTimeField(null=True, blank=True);
+    esActual = models.BooleanField(default=True)
+    empleado = models.ForeignKey('Empleado', on_delete=models.CASCADE)
+    fechaBajada = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return str(self.empleado.nombreCompleto) + " " + str(self.id) + " " + self.fechaCreacion.strftime("%d/%m/%Y %H:%M:%S");
+        return str(self.empleado.nombreCompleto) + " " + str(self.id) + " " + self.fechaCreacion.strftime("%d/%m/%Y %H:%M:%S")
 class DiaHorario(Base):
-    horaEntrada = models.TimeField(null=True, blank=True);
-    horaSalida = models.TimeField(null=True, blank=True);
-    diaNombre = models.ForeignKey('Dia', on_delete=models.CASCADE);
-    horario = models.ForeignKey('Horario', on_delete=models.CASCADE);
+    horaEntrada = models.TimeField(null=True, blank=True)
+    horaSalida = models.TimeField(null=True, blank=True)
+    diaNombre = models.ForeignKey('Dia', on_delete=models.CASCADE)
+    horario = models.ForeignKey('Horario', on_delete=models.CASCADE)
     def __str__(self):
-        return str(self.diaNombre) + " In: " + str(self.horaEntrada)+ " Out: " + str(self.horaSalida);
+        return str(self.diaNombre) + " In: " + str(self.horaEntrada)+ " Out: " + str(self.horaSalida)
 
 class Dia(Base):
-    nombre = models.CharField(max_length=10);
+    nombre = models.CharField(max_length=10)
     def __str__(self):
-        return self.nombre;
+        return self.nombre
 class TipoMarca(Base):
-    nombre = models.CharField(max_length=10);
-    descripcion = models.CharField(max_length=100);
+    nombre = models.CharField(max_length=10)
+    descripcion = models.CharField(max_length=100)
     def __str__(self):
-        return self.nombre;
+        return self.nombre
 class Marca(Base):
-    fechaHora = models.DateTimeField();
-    empleado = models.ForeignKey('Empleado', on_delete=models.CASCADE);
-    tipoMarca = models.ForeignKey('TipoMarca', on_delete=models.CASCADE,null=True, blank=True);
-    diaHorario = models.ForeignKey('DiaHorario', on_delete=models.CASCADE,null=True, blank=True);
+    fechaHora = models.DateTimeField()
+    empleado = models.ForeignKey('Empleado', on_delete=models.CASCADE)
+    tipoMarca = models.ForeignKey('TipoMarca', on_delete=models.CASCADE,null=True, blank=True)
+    diaHorario = models.ForeignKey('DiaHorario', on_delete=models.CASCADE,null=True, blank=True)
     def __str__(self):
-        return str(self.empleado.nombreCompleto) + " " + str(self.fechaHora) + " " + str(self.tipoMarca);
+        return str(self.empleado.nombreCompleto) + " " + str(self.fechaHora) + " " + str(self.tipoMarca)
+class TipoFalta(Base):
+    nombre = models.CharField(max_length=300)
+    descripcion = models.TextField(max_length=300)
+    def __str__(self):
+        return self.nombre
+class Falta(Base):
+    marca = models.ForeignKey('Marca', on_delete=models.CASCADE, null=True, blank=True)
+    empleado = models.ForeignKey('Empleado', on_delete=models.CASCADE , null=True, blank=True)
+    tipoFalta = models.ForeignKey('TipoFalta', on_delete=models.CASCADE , null=True, blank=True)
+    fechaHora = models.DateTimeField(null=True, blank=True)
+    descripcion = models.TextField(max_length=300, null=True, blank=True)
+    estaJustificada = models.BooleanField(default=False, null=True, blank=True)
+    justificacion = models.TextField(max_length=300, null=True, blank=True)
+    docs = models.FileField(upload_to='docs/', null=True, blank=True)
+    def __str__(self):
+        return str(self.empleado.nombreCompleto) + " " + str(self.tipoFalta) + " " + str(self.fechaCreacion)

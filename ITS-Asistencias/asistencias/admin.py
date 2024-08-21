@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db import transaction
 from django.contrib import messages
-from .models import Empleado, Horario, DiaHorario, Dia, TipoMarca, Marca
+from .models import Empleado, Horario, DiaHorario, Dia, TipoMarca, Marca, TipoFalta, Falta
 from django.utils.html import format_html
 class EmpleadoAdmin(admin.ModelAdmin):
     def foto_perfil(self, obj):
@@ -44,6 +44,13 @@ class MarcaAdmin(admin.ModelAdmin):
     list_display = ('id', 'fechaHora', 'empleado', 'tipoMarca', 'diaHorario')
     search_fields = ('id', 'fechaHora', 'empleado__nombreCompleto', 'tipoMarca__nombre', 'diaHorario__id')
     list_filter = ('empleado__nombreCompleto', 'tipoMarca__nombre', 'diaHorario__horario__id')
+class TipoFaltaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'nombre', 'descripcion')
+    search_fields = ('id', 'nombre', 'descripcion')
+class FaltaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'marca', 'empleado', 'tipoFalta', 'descripcion', 'estaJustificada', 'justificacion')
+    search_fields = ('id', 'marca__id', 'empleado__nombreCompleto', 'tipoFalta__nombre', 'descripcion', 'justificacion')
+    list_filter = ('empleado__nombreCompleto', 'tipoFalta__nombre', 'estaJustificada')
 
 admin.site.register(Empleado, EmpleadoAdmin)
 admin.site.register(Horario, HorarioAdmin)
@@ -51,6 +58,8 @@ admin.site.register(DiaHorario, DiaHorarioAdmin)
 admin.site.register(Dia, DiaAdmin)
 admin.site.register(TipoMarca, TipoMarcaAdmin)
 admin.site.register(Marca, MarcaAdmin)
+admin.site.register(TipoFalta, TipoFaltaAdmin)
+admin.site.register(Falta, FaltaAdmin)
 
 
 # Register your models here.
